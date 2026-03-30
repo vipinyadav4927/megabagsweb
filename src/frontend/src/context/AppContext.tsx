@@ -172,7 +172,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [orders, setOrders] = useState<Order[]>(() => {
     try {
       const stored = localStorage.getItem("megabags_orders");
-      if (stored) return JSON.parse(stored);
+      if (stored) {
+        const parsed = JSON.parse(stored) as Partial<Order>[];
+        // Migration: ensure payment fields exist for older saved orders.
+        return parsed.map((o) => ({
+          ...(o as Order),
+          paymentStatus: o.paymentStatus ?? "Pending",
+        }));
+      }
     } catch {}
     return [];
   });
