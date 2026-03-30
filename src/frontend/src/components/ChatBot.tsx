@@ -46,7 +46,7 @@ function getBotResponse(input: string): string {
     return "Apna Order ID enter karein Track Order page pe apna status check karne ke liye. Order ID format: MB12345 \uD83D\uDD0D";
   }
   if (/\b(contact|phone|address|location|call|email|number)\b/.test(msg)) {
-    return "Aap Contact Us page pe jaayein ya seedha WhatsApp karein. \uD83D\uDCDE\n\nAddress: Industrial Area, Pune, Maharashtra\nPhone: +91 98765 43210\nEmail: info@megabags.in";
+    return "Aap Contact Us page pe jaayein ya seedha WhatsApp karein. \uD83D\uDCDE\n\nAddress: Industrial Area, Pune, Maharashtra\nPhone: +91 9161722416\nEmail: vipinyadav4926@gmail.com";
   }
   if (/\b(minimum|min order|moq|quantity)\b/.test(msg)) {
     return "Hamari minimum order quantity (MOQ) 1000 bags hai. Bulk orders ke liye special pricing milti hai! \uD83D\uDCCA";

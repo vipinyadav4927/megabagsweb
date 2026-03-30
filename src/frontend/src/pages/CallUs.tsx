@@ -2,17 +2,17 @@ export default function CallUs() {
   const contacts = [
     {
       label: "Sales Enquiry",
-      number: "+91 98765 43210",
+      number: "+91 9161722416",
       hours: "Mon-Sat, 9AM–6PM",
     },
     {
       label: "Order Support",
-      number: "+91 87654 32109",
+      number: "+91 9161722416",
       hours: "Mon-Sat, 9AM–7PM",
     },
     {
       label: "Bulk Orders",
-      number: "+91 76543 21098",
+      number: "+91 9161722416",
       hours: "Mon-Fri, 10AM–5PM",
     },
   ];
@@ -55,7 +55,7 @@ export default function CallUs() {
           For quick queries and bulk order discussions
         </p>
         <a
-          href="https://wa.me/919876543210?text=Hello%2C%20I%27m%20interested%20in%20your%20industrial%20paper%20bags."
+          href="https://wa.me/919161722416?text=Hello%2C%20I%27m%20interested%20in%20your%20industrial%20paper%20bags."
           target="_blank"
           rel="noopener noreferrer"
           className="inline-block bg-[#25D366] hover:bg-[#20b85a] text-white px-8 py-3 rounded-xl font-bold transition-colors"

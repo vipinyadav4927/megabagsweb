@@ -29,16 +29,16 @@ export default function Layout() {
       <header className="hidden md:block sticky top-0 z-50">
         <div className="bg-[#0B3D63] py-1.5 px-4 text-xs text-white/80 flex justify-end gap-6">
           <a
-            href="tel:+919876543210"
+            href="tel:+919161722416"
             className="hover:text-white transition-colors"
           >
-            📞 +91 98765 43210
+            📞 +91 9161722416
           </a>
           <a
-            href="mailto:info@megabags.in"
+            href="mailto:vipinyadav4926@gmail.com"
             className="hover:text-white transition-colors"
           >
-            ✉ info@megabags.in
+            ✉ vipinyadav4926@gmail.com
           </a>
           <Link to="/call" className="hover:text-white transition-colors">
             Call Us
@@ -164,8 +164,8 @@ export default function Layout() {
             <h4 className="font-bold mb-3 text-white/90">Contact</h4>
             <div className="space-y-2 text-sm text-white/60">
               <div>📍 Industrial Area, Pune, Maharashtra</div>
-              <div>📞 +91 98765 43210</div>
-              <div>✉ info@megabags.in</div>
+              <div>📞 +91 9161722416</div>
+              <div>✉ vipinyadav4926@gmail.com</div>
               <div>🕐 Mon–Sat: 9AM–6PM</div>
             </div>
           </div>

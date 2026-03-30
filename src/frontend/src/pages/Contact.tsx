@@ -101,8 +101,12 @@ export default function Contact() {
                   value:
                     "Plot No. 45, Industrial Area, Bhosari, Pune - 411026, Maharashtra",
                 },
-                { icon: "📞", label: "Phone", value: "+91 98765 43210" },
-                { icon: "✉", label: "Email", value: "info@megabags.in" },
+                { icon: "📞", label: "Phone", value: "+91 9161722416" },
+                {
+                  icon: "✉",
+                  label: "Email",
+                  value: "vipinyadav4926@gmail.com",
+                },
                 {
                   icon: "🕐",
                   label: "Working Hours",
