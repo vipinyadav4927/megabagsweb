@@ -51,6 +51,9 @@ export default function PlaceOrder() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [successOrderId, setSuccessOrderId] = useState("");
+  const [successPaymentId, setSuccessPaymentId] = useState<string | undefined>(
+    undefined,
+  );
   const [paymentError, setPaymentError] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -109,6 +112,10 @@ export default function PlaceOrder() {
         },
       },
       handler: (_response: Record<string, unknown>) => {
+        const paymentResponse = _response as Partial<{
+          razorpay_payment_id: string;
+          razorpay_order_id: string;
+        }>;
         const id = addOrder({
           customerName: form.customerName,
           phone: form.phone,
@@ -118,8 +125,11 @@ export default function PlaceOrder() {
           address: form.address,
           notes: form.notes,
           paymentStatus: "Paid",
+          razorpayPaymentId: paymentResponse.razorpay_payment_id,
+          razorpayOrderId: paymentResponse.razorpay_order_id,
         });
         setSuccessOrderId(id);
+        setSuccessPaymentId(paymentResponse.razorpay_payment_id);
         setIsProcessing(false);
       },
     };
@@ -220,6 +230,15 @@ export default function PlaceOrder() {
               PAID
             </div>
           </div>
+
+          {successPaymentId && (
+            <div className="mt-3 text-left bg-gray-50 border border-gray-100 rounded-xl px-4 py-3">
+              <div className="text-xs text-gray-500 mb-1">Razorpay Payment ID</div>
+              <div className="font-mono text-sm text-gray-900 break-all">
+                {successPaymentId}
+              </div>
+            </div>
+          )}
 
           <div className="flex items-center justify-center gap-3 mb-6">
             <span className="flex items-center gap-1 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">

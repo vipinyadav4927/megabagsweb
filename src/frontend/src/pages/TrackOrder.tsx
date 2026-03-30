@@ -81,19 +81,30 @@ export default function TrackOrder() {
                 })}
               </p>
             </div>
-            <span
-              className={`px-3 py-1 rounded-full text-sm font-bold ${
-                result.status === "Delivered"
-                  ? "bg-green-100 text-green-700"
-                  : result.status === "Dispatched"
-                    ? "bg-blue-100 text-blue-700"
-                    : result.status === "Processing"
-                      ? "bg-yellow-100 text-yellow-700"
-                      : "bg-gray-100 text-gray-700"
-              }`}
-            >
-              {result.status}
-            </span>
+            <div className="flex flex-col items-end gap-2">
+              <span
+                className={`px-3 py-1 rounded-full text-sm font-bold ${
+                  result.status === "Delivered"
+                    ? "bg-green-100 text-green-700"
+                    : result.status === "Dispatched"
+                      ? "bg-blue-100 text-blue-700"
+                      : result.status === "Processing"
+                        ? "bg-yellow-100 text-yellow-700"
+                        : "bg-gray-100 text-gray-700"
+                }`}
+              >
+                {result.status}
+              </span>
+              <span
+                className={`px-3 py-1 rounded-full text-xs font-bold ${
+                  result.paymentStatus === "Paid"
+                    ? "bg-green-100 text-green-700"
+                    : "bg-amber-100 text-amber-800"
+                }`}
+              >
+                Payment: {result.paymentStatus}
+              </span>
+            </div>
           </div>
 
           {/* Order info */}
@@ -125,6 +136,30 @@ export default function TrackOrder() {
               </div>
             </div>
           </div>
+
+          {(result.razorpayPaymentId || result.razorpayOrderId) && (
+            <div className="bg-white rounded-xl border border-gray-100 p-4 mb-6">
+              <div className="text-gray-400 text-sm font-semibold mb-2">
+                Payment Details
+              </div>
+              {result.razorpayPaymentId && (
+                <div className="flex items-center justify-between gap-3 mb-2">
+                  <span className="text-gray-500 text-sm">Payment ID</span>
+                  <span className="font-mono text-sm text-gray-900 break-all">
+                    {result.razorpayPaymentId}
+                  </span>
+                </div>
+              )}
+              {result.razorpayOrderId && (
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-gray-500 text-sm">Razorpay Order</span>
+                  <span className="font-mono text-sm text-gray-900 break-all">
+                    {result.razorpayOrderId}
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Status timeline */}
           <div>

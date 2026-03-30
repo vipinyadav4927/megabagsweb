@@ -28,6 +28,8 @@ export interface Order {
   notes: string;
   status: "Order Placed" | "Processing" | "Dispatched" | "Delivered";
   paymentStatus: "Paid" | "Pending";
+  razorpayPaymentId?: string;
+  razorpayOrderId?: string;
   createdAt: string;
 }
 

@@ -73,9 +73,14 @@ export default function Admin() {
   };
 
   const openEditForm = (p: Product) => {
+    const images = p.images?.length
+      ? p.images
+      : p.imageUrl
+        ? [p.imageUrl]
+        : [];
     setPForm({
       name: p.name,
-      imageUrl: p.imageUrl,
+      imageUrl: images.join(", "),
       description: p.description,
       specs: p.specs,
       applications: p.applications,
@@ -87,10 +92,24 @@ export default function Admin() {
 
   const handleSaveProduct = () => {
     if (!pForm.name) return;
+    const imageList = pForm.imageUrl
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    const mainImage = imageList[0] ?? "";
     if (editingProduct) {
-      updateProduct({ ...editingProduct, ...pForm });
+      updateProduct({
+        ...editingProduct,
+        ...pForm,
+        imageUrl: mainImage,
+        images: imageList,
+      });
     } else {
-      addProduct({ ...pForm, images: pForm.imageUrl ? [pForm.imageUrl] : [] });
+      addProduct({
+        ...pForm,
+        imageUrl: mainImage,
+        images: imageList,
+      });
     }
     setShowAddForm(false);
     setEditingProduct(null);
@@ -251,7 +270,7 @@ export default function Admin() {
                         htmlFor={`pform-${field}`}
                         className="block text-xs font-semibold text-gray-500 mb-1 uppercase"
                       >
-                        {field}
+                    {field === "imageUrl" ? "Image URLs (comma separated)" : field}
                       </label>
                       <input
                         id={`pform-${field}`}
