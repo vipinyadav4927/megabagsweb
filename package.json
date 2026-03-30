@@ -13,6 +13,10 @@
     "fix": "pnpm -r --if-present run fix"
   },
   "devDependencies": {
-    "sharp": "^0.34.4"
+    "@types/node": "^25.5.0",
+    "@vitejs/plugin-react": "^4.7.0",
+    "sharp": "^0.34.4",
+    "vite": "^8.0.3",
+    "vite-plugin-environment": "^1.1.3"
   }
 }

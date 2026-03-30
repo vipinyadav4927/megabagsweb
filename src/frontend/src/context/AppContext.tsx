@@ -37,11 +37,12 @@ const DEFAULT_PRODUCTS: Product[] = [
     name: "Valve Paper Bags",
     description:
       "High-quality valve paper bags ideal for cement, chemicals, and powder products. Features self-closing valve for easy filling.",
-    imageUrl: "/assets/generated/valve-bag-1.dim_600x600.jpg",
+    imageUrl:
+      "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=1200&q=80",
     images: [
-      "/assets/generated/valve-bag-1.dim_600x600.jpg",
-      "/assets/generated/valve-bag-2.dim_600x600.jpg",
-      "/assets/generated/valve-bag-3.dim_600x600.jpg",
+      "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=1200&q=80",
+      "https://images.unsplash.com/photo-1581093458791-9d15482442f6?w=1200&q=80",
+      "https://images.unsplash.com/photo-1586880244386-8b3c1f5a13b6?w=1200&q=80",
     ],
     specs:
       "Layers: 2-5 | Weight: 50-100 gsm | Size: Custom | Valve Type: Pasted/Sewn",
@@ -53,11 +54,12 @@ const DEFAULT_PRODUCTS: Product[] = [
     name: "Open Mouth Paper Bags",
     description:
       "Versatile open-mouth bags for easy packing of granular materials. Available in various sizes with customizable printing.",
-    imageUrl: "/assets/generated/openmouth-bag-1.dim_600x600.jpg",
+    imageUrl:
+      "https://images.unsplash.com/photo-1595079676339-1534801ad6cf?w=1200&q=80",
     images: [
-      "/assets/generated/openmouth-bag-1.dim_600x600.jpg",
-      "/assets/generated/openmouth-bag-2.dim_600x600.jpg",
-      "/assets/generated/openmouth-bag-3.dim_600x600.jpg",
+      "https://images.unsplash.com/photo-1595079676339-1534801ad6cf?w=1200&q=80",
+      "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=1200&q=80",
+      "https://images.unsplash.com/photo-1556740749-887f6717d7e4?w=1200&q=80",
     ],
     specs:
       "Layers: 1-4 | Weight: 60-120 gsm | Size: 5kg-50kg | Closure: Sewn/Glued",
@@ -69,11 +71,12 @@ const DEFAULT_PRODUCTS: Product[] = [
     name: "Multiwall Paper Bags",
     description:
       "Heavy-duty multiwall construction for maximum strength and moisture resistance. Perfect for bulk industrial packaging.",
-    imageUrl: "/assets/generated/multiwall-bag-1.dim_600x600.jpg",
+    imageUrl:
+      "https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?w=1200&q=80",
     images: [
-      "/assets/generated/multiwall-bag-1.dim_600x600.jpg",
-      "/assets/generated/multiwall-bag-2.dim_600x600.jpg",
-      "/assets/generated/multiwall-bag-3.dim_600x600.jpg",
+      "https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?w=1200&q=80",
+      "https://images.unsplash.com/photo-1603791440384-56cd371ee9a7?w=1200&q=80",
+      "https://images.unsplash.com/photo-1578575437130-527eed3abbec?w=1200&q=80",
     ],
     specs:
       "Layers: 3-6 | Burst Strength: 200+ kPa | Size: 10kg-50kg | Inner: PE liner optional",
@@ -86,11 +89,12 @@ const DEFAULT_PRODUCTS: Product[] = [
     name: "HDPE Laminated Paper Bags",
     description:
       "Premium HDPE laminated bags providing superior moisture barrier and durability for sensitive materials.",
-    imageUrl: "/assets/generated/hdpe-bag-1.dim_600x600.jpg",
+    imageUrl:
+      "https://images.unsplash.com/photo-1553413077-190dd305871c?w=1200&q=80",
     images: [
-      "/assets/generated/hdpe-bag-1.dim_600x600.jpg",
-      "/assets/generated/hdpe-bag-2.dim_600x600.jpg",
-      "/assets/generated/hdpe-bag-3.dim_600x600.jpg",
+      "https://images.unsplash.com/photo-1553413077-190dd305871c?w=1200&q=80",
+      "https://images.unsplash.com/photo-1494412519320-aa613dfb7738?w=1200&q=80",
+      "https://images.unsplash.com/photo-1489515217757-5fd1be406fef?w=1200&q=80",
     ],
     specs:
       "HDPE Coating: 15-25 gsm | Base Paper: 80-120 gsm | Lamination: Both sides | UV resistant",
@@ -103,11 +107,12 @@ const DEFAULT_PRODUCTS: Product[] = [
     name: "Aluminium Foil Bags",
     description:
       "Specialized aluminium foil bags for moisture-sensitive and aroma-preserving applications with excellent barrier properties.",
-    imageUrl: "/assets/generated/foil-bag-1.dim_600x600.jpg",
+    imageUrl:
+      "https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=1200&q=80",
     images: [
-      "/assets/generated/foil-bag-1.dim_600x600.jpg",
-      "/assets/generated/foil-bag-2.dim_600x600.jpg",
-      "/assets/generated/foil-bag-3.dim_600x600.jpg",
+      "https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=1200&q=80",
+      "https://images.unsplash.com/photo-1556745757-8d76bdb6984b?w=1200&q=80",
+      "https://images.unsplash.com/photo-1607082349566-187342175e2f?w=1200&q=80",
     ],
     specs:
       "Foil Thickness: 7-12 microns | Layers: 3-5 | Barrier: O2, moisture, light | Heat sealable",
@@ -116,6 +121,10 @@ const DEFAULT_PRODUCTS: Product[] = [
     category: "foil",
   },
 ];
+
+function isLegacyGeneratedAsset(url?: string) {
+  return typeof url === "string" && url.startsWith("/assets/generated/");
+}
 
 interface AppContextType {
   products: Product[];
@@ -136,11 +145,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const stored = localStorage.getItem("megabags_products");
       if (stored) {
         const parsed: Product[] = JSON.parse(stored);
-        // Migrate: ensure images array exists on each product
+        // Migrate legacy local image paths and ensure images array exists.
         const migrated = parsed.map((p, i) => ({
           ...p,
+          imageUrl: isLegacyGeneratedAsset(p.imageUrl)
+            ? (DEFAULT_PRODUCTS[i]?.imageUrl ?? p.imageUrl)
+            : p.imageUrl,
           images: p.images?.length
-            ? p.images
+            ? p.images.map((img, imgIndex) =>
+                isLegacyGeneratedAsset(img)
+                  ? (DEFAULT_PRODUCTS[i]?.images?.[imgIndex] ??
+                    DEFAULT_PRODUCTS[i]?.imageUrl ??
+                    p.imageUrl)
+                  : img,
+              )
             : (DEFAULT_PRODUCTS[i]?.images ?? [p.imageUrl]),
         }));
         return migrated;
