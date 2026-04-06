@@ -27,7 +27,9 @@ export interface Order {
   address: string;
   notes: string;
   status: "Order Placed" | "Processing" | "Dispatched" | "Delivered";
+  paymentMethod: "Razorpay" | "Google Pay";
   paymentStatus: "Paid" | "Pending";
+  paymentReference?: string;
   razorpayPaymentId?: string;
   razorpayOrderId?: string;
   createdAt: string;
@@ -136,6 +138,11 @@ interface AppContextType {
   deleteProduct: (id: string) => void;
   addOrder: (o: Omit<Order, "orderId" | "status" | "createdAt">) => string;
   updateOrderStatus: (orderId: string, status: Order["status"]) => void;
+  updateOrderPayment: (
+    orderId: string,
+    paymentStatus: Order["paymentStatus"],
+    paymentReference?: string,
+  ) => void;
   getOrder: (orderId: string) => Order | undefined;
 }
 
@@ -177,7 +184,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
         // Migration: ensure payment fields exist for older saved orders.
         return parsed.map((o) => ({
           ...(o as Order),
-          paymentStatus: o.paymentStatus ?? "Pending",
+          paymentMethod:
+            o.paymentMethod ??
+            (o.razorpayPaymentId || o.razorpayOrderId
+              ? "Razorpay"
+              : "Google Pay"),
+          paymentStatus:
+            o.paymentStatus ?? (o.razorpayPaymentId ? "Paid" : "Pending"),
+          paymentReference:
+            o.paymentReference ?? o.razorpayPaymentId ?? undefined,
         }));
       }
     } catch {}
@@ -205,21 +220,53 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setProducts((prev) => prev.filter((x) => x.id !== id));
   };
 
+  const generateOrderId = (existingOrders: Order[]) => {
+    let orderId = "";
+    do {
+      orderId = `MB${Math.floor(10000 + Math.random() * 90000)}`;
+    } while (existingOrders.some((order) => order.orderId === orderId));
+    return orderId;
+  };
+
   const addOrder = (o: Omit<Order, "orderId" | "status" | "createdAt">) => {
-    const orderId = `MB${Math.floor(10000 + Math.random() * 90000)}`;
-    const newOrder: Order = {
-      ...o,
-      orderId,
-      status: "Order Placed",
-      createdAt: new Date().toISOString(),
-    };
-    setOrders((prev) => [...prev, newOrder]);
+    let orderId = "";
+    setOrders((prev) => {
+      orderId = generateOrderId(prev);
+      const newOrder: Order = {
+        ...o,
+        orderId,
+        status: "Order Placed",
+        createdAt: new Date().toISOString(),
+      };
+      return [...prev, newOrder];
+    });
     return orderId;
   };
 
   const updateOrderStatus = (orderId: string, status: Order["status"]) => {
     setOrders((prev) =>
       prev.map((o) => (o.orderId === orderId ? { ...o, status } : o)),
+    );
+  };
+
+  const updateOrderPayment = (
+    orderId: string,
+    paymentStatus: Order["paymentStatus"],
+    paymentReference?: string,
+  ) => {
+    setOrders((prev) =>
+      prev.map((order) =>
+        order.orderId === orderId
+          ? {
+              ...order,
+              paymentStatus,
+              paymentReference:
+                paymentReference === undefined
+                  ? order.paymentReference
+                  : paymentReference,
+            }
+          : order,
+      ),
     );
   };
 
@@ -236,6 +283,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         deleteProduct,
         addOrder,
         updateOrderStatus,
+        updateOrderPayment,
         getOrder,
       }}
     >

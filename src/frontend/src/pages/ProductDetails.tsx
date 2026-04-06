@@ -40,81 +40,78 @@ export default function ProductDetails() {
   const { id } = useParams();
   const { products } = useApp();
   const navigate = useNavigate();
-  const product = products.find((p) => p.id === id);
+  const product = products.find((item) => item.id === id);
   const [activeImage, setActiveImage] = useState(0);
-  const [imgVisible, setImgVisible] = useState(true);
+  const [imageVisible, setImageVisible] = useState(true);
 
   if (!product)
     return (
-      <div className="text-center py-20 page-enter">
-        <p className="text-gray-500 mb-4">Product not found</p>
-        <Link to="/products" className="text-[#0E5A7A] font-semibold">
-          ← Back to Products
+      <div className="page-enter py-20 text-center">
+        <p className="mb-4 text-gray-500">Product not found</p>
+        <Link to="/products" className="font-semibold text-[#0E5A7A]">
+          Back to Products
         </Link>
       </div>
     );
 
   const images = product.images?.length ? product.images : [product.imageUrl];
 
-  const switchImage = (idx: number) => {
-    if (idx === activeImage) return;
-    setImgVisible(false);
+  const switchImage = (index: number) => {
+    if (index === activeImage) return;
+
+    setImageVisible(false);
     setTimeout(() => {
-      setActiveImage(idx);
-      setImgVisible(true);
+      setActiveImage(index);
+      setImageVisible(true);
     }, 200);
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-10 page-enter">
+    <div className="page-enter mx-auto max-w-6xl px-6 py-10">
       <button
         type="button"
         onClick={() => navigate(-1)}
-        className="flex items-center gap-1 text-[#0E5A7A] font-semibold mb-6 hover:underline transition-all hover:-translate-x-1"
+        className="mb-6 flex items-center gap-1 font-semibold text-[#0E5A7A] transition-all hover:-translate-x-1 hover:underline"
       >
         <ChevronLeft size={18} /> Back
       </button>
 
-      <div className="grid md:grid-cols-2 gap-10 mb-12">
-        {/* Image Gallery */}
+      <div className="mb-12 grid gap-10 md:grid-cols-2">
         <div>
-          {/* Main Image with zoom on hover */}
-          <div className="aspect-square rounded-2xl overflow-hidden mb-4 border border-gray-200 shadow-md bg-gray-50 relative group">
+          <div className="group relative mb-4 aspect-square overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 shadow-md">
             <img
               key={activeImage}
               src={images[activeImage]}
               alt={product.name}
-              className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110"
+              className="h-full w-full object-cover transition-all duration-500 group-hover:scale-110"
               style={{
-                opacity: imgVisible ? 1 : 0,
+                opacity: imageVisible ? 1 : 0,
                 transition: "opacity 0.2s ease-in-out, transform 0.4s ease",
               }}
             />
-            {/* Image counter badge */}
-            <div className="absolute bottom-3 right-3 bg-black/50 text-white text-xs font-medium px-2 py-1 rounded-full backdrop-blur-sm">
+            <div className="absolute bottom-3 right-3 rounded-full bg-black/50 px-2 py-1 text-xs font-medium text-white backdrop-blur-sm">
               {activeImage + 1} / {images.length}
             </div>
           </div>
 
-          {/* Thumbnails */}
           <div className="flex gap-3">
-            {images.map((img, idx) => (
+            {images.map((image, index) => (
               <button
                 type="button"
-                key={img}
-                onClick={() => switchImage(idx)}
-                className={`relative w-20 h-20 rounded-xl overflow-hidden border-2 transition-all duration-200 hover:scale-105 focus:outline-none ${
-                  activeImage === idx
+                key={image}
+                onClick={() => switchImage(index)}
+                className={`relative h-20 w-20 overflow-hidden rounded-xl border-2 transition-all duration-200 hover:scale-105 focus:outline-none ${
+                  activeImage === index
                     ? "border-[#0E5A7A] shadow-lg shadow-[#0E5A7A]/20 ring-2 ring-[#0E5A7A]/30"
                     : "border-gray-200 hover:border-[#0E5A7A]/50"
                 }`}
               >
                 <img
-                  src={img}
-                  alt={`View ${idx + 1}`}
-                  className="w-full h-full object-cover"
+                  src={image}
+                  alt={`View ${index + 1}`}
+                  className="h-full w-full object-cover"
                 />
-                {activeImage === idx && (
+                {activeImage === index && (
                   <div className="absolute inset-0 bg-[#0E5A7A]/10" />
                 )}
               </button>
@@ -122,47 +119,46 @@ export default function ProductDetails() {
           </div>
         </div>
 
-        {/* Info */}
         <div>
-          <h1 className="text-2xl md:text-3xl font-black text-gray-900 mb-3">
+          <h1 className="mb-3 text-2xl font-black text-gray-900 md:text-3xl">
             {product.name}
           </h1>
-          <div className="flex items-center gap-1 mb-4">
-            {[1, 2, 3, 4, 5].map((s) => (
+          <div className="mb-4 flex items-center gap-1">
+            {[1, 2, 3, 4, 5].map((star) => (
               <Star
-                key={s}
+                key={star}
                 size={16}
                 className="fill-yellow-400 text-yellow-400"
               />
             ))}
-            <span className="text-gray-500 text-sm ml-1">(5 reviews)</span>
+            <span className="ml-1 text-sm text-gray-500">(5 reviews)</span>
           </div>
-          <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 flex items-center gap-3 mb-6 hover:shadow-md transition-shadow">
+          <div className="mb-6 flex items-center gap-3 rounded-xl border border-orange-200 bg-orange-50 p-4 transition-shadow hover:shadow-md">
             <Package className="text-[#F97316]" size={24} />
             <div>
               <div className="font-bold text-gray-900">
                 Minimum Order Quantity
               </div>
-              <div className="text-[#F97316] font-black text-lg">1000 Bags</div>
+              <div className="text-lg font-black text-[#F97316]">1000 Bags</div>
             </div>
           </div>
-          <p className="text-gray-600 leading-relaxed mb-6">
+          <p className="mb-6 leading-relaxed text-gray-600">
             {product.description}
           </p>
 
           <div className="mb-6">
-            <h3 className="font-bold text-gray-900 mb-2">Specifications</h3>
-            <div className="bg-gray-50 rounded-xl p-4">
+            <h3 className="mb-2 font-bold text-gray-900">Specifications</h3>
+            <div className="rounded-xl bg-gray-50 p-4">
               {product.specs.split(" | ").map((spec) => {
-                const [key, val] = spec.split(": ");
+                const [key, value] = spec.split(": ");
                 return (
                   <div
                     key={spec}
-                    className="flex justify-between py-1.5 border-b border-gray-200 last:border-0"
+                    className="flex justify-between border-b border-gray-200 py-1.5 last:border-0"
                   >
-                    <span className="text-gray-500 text-sm">{key}</span>
-                    <span className="text-gray-900 text-sm font-medium">
-                      {val}
+                    <span className="text-sm text-gray-500">{key}</span>
+                    <span className="text-sm font-medium text-gray-900">
+                      {value}
                     </span>
                   </div>
                 );
@@ -171,14 +167,14 @@ export default function ProductDetails() {
           </div>
 
           <div className="mb-8">
-            <h3 className="font-bold text-gray-900 mb-2">Applications</h3>
+            <h3 className="mb-2 font-bold text-gray-900">Applications</h3>
             <div className="flex flex-wrap gap-2">
-              {product.applications.split(", ").map((app) => (
+              {product.applications.split(", ").map((application) => (
                 <span
-                  key={app}
-                  className="bg-[#0E5A7A]/10 text-[#0E5A7A] px-3 py-1 rounded-full text-sm font-medium hover:bg-[#0E5A7A]/20 transition-colors cursor-default"
+                  key={application}
+                  className="cursor-default rounded-full bg-[#0E5A7A]/10 px-3 py-1 text-sm font-medium text-[#0E5A7A] transition-colors hover:bg-[#0E5A7A]/20"
                 >
-                  {app}
+                  {application}
                 </span>
               ))}
             </div>
@@ -186,36 +182,35 @@ export default function ProductDetails() {
 
           <Link
             to={`/order?product=${encodeURIComponent(product.name)}`}
-            className="block w-full bg-[#F97316] hover:bg-[#e8660e] text-white text-center py-4 rounded-xl font-bold text-lg transition-all hover:scale-[1.02] hover:shadow-lg hover:shadow-orange-200 active:scale-[0.98]"
+            className="block w-full rounded-xl bg-[#F97316] py-4 text-center text-lg font-bold text-white transition-all hover:scale-[1.02] hover:bg-[#E8660E] hover:shadow-lg hover:shadow-orange-200 active:scale-[0.98]"
           >
-            🛒 Place Order (Min. 1000 bags)
+            Place Order (Min. 1000 bags)
           </Link>
         </div>
       </div>
 
-      {/* Reviews */}
       <div>
-        <h2 className="text-xl font-black text-gray-900 mb-6">
+        <h2 className="mb-6 text-xl font-black text-gray-900">
           Customer Reviews
         </h2>
-        <div className="grid md:grid-cols-2 gap-4">
-          {REVIEWS.map((r) => (
+        <div className="grid gap-4 md:grid-cols-2">
+          {REVIEWS.map((review) => (
             <div
-              key={r.name}
-              className="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
+              key={review.name}
+              className="rounded-xl border border-gray-200 bg-white p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
             >
-              <div className="flex items-start justify-between mb-3">
+              <div className="mb-3 flex items-start justify-between">
                 <div>
-                  <div className="font-bold text-gray-900">{r.name}</div>
-                  <div className="text-gray-400 text-xs">{r.date}</div>
+                  <div className="font-bold text-gray-900">{review.name}</div>
+                  <div className="text-xs text-gray-400">{review.date}</div>
                 </div>
                 <div className="flex">
-                  {[1, 2, 3, 4, 5].map((s) => (
+                  {[1, 2, 3, 4, 5].map((star) => (
                     <Star
-                      key={s}
+                      key={star}
                       size={14}
                       className={
-                        s <= r.rating
+                        star <= review.rating
                           ? "fill-yellow-400 text-yellow-400"
                           : "text-gray-300"
                       }
@@ -223,7 +218,9 @@ export default function ProductDetails() {
                   ))}
                 </div>
               </div>
-              <p className="text-gray-600 text-sm leading-relaxed">{r.text}</p>
+              <p className="text-sm leading-relaxed text-gray-600">
+                {review.text}
+              </p>
             </div>
           ))}
         </div>

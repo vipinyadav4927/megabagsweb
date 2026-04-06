@@ -26,29 +26,29 @@ export default function TrackOrder() {
     result && result !== "not-found" ? STATUSES.indexOf(result.status) : -1;
 
   return (
-    <div className="max-w-2xl mx-auto px-6 py-10">
+    <div className="mx-auto max-w-2xl px-6 py-10">
       <div className="mb-8">
-        <h1 className="text-3xl font-black text-gray-900 mb-2">
+        <h1 className="mb-2 text-3xl font-black text-gray-900">
           Track Your Order
         </h1>
         <p className="text-gray-500">Enter your Order ID to check status</p>
-        <div className="w-16 h-1 bg-[#F97316] rounded mt-3" />
+        <div className="mt-3 h-1 w-16 rounded bg-[#F97316]" />
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 mb-6">
+      <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6 md:p-8">
         <div className="flex gap-3">
           <input
             type="text"
             value={orderId}
-            onChange={(e) => setOrderId(e.target.value.toUpperCase())}
-            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+            onChange={(event) => setOrderId(event.target.value.toUpperCase())}
+            onKeyDown={(event) => event.key === "Enter" && handleSearch()}
             placeholder="e.g. MB12345"
-            className="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0E5A7A]/30 text-lg font-mono uppercase"
+            className="flex-1 rounded-xl border border-gray-200 px-4 py-3 text-lg font-mono uppercase focus:outline-none focus:ring-2 focus:ring-[#0E5A7A]/30"
           />
           <button
             type="button"
             onClick={handleSearch}
-            className="bg-[#F97316] hover:bg-[#e8660e] text-white px-6 py-3 rounded-xl font-bold transition-colors"
+            className="rounded-xl bg-[#F97316] px-6 py-3 font-bold text-white transition-colors hover:bg-[#E8660E]"
           >
             Track
           </button>
@@ -56,23 +56,22 @@ export default function TrackOrder() {
       </div>
 
       {result === "not-found" && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
-          <div className="text-4xl mb-3">😕</div>
-          <h3 className="font-bold text-red-800 mb-1">Order Not Found</h3>
-          <p className="text-red-600 text-sm">
+        <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center">
+          <h3 className="mb-1 font-bold text-red-800">Order Not Found</h3>
+          <p className="text-sm text-red-600">
             No order found with ID "{orderId}". Please check and try again.
           </p>
         </div>
       )}
 
       {result && result !== "not-found" && (
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8">
-          <div className="flex items-start justify-between mb-6">
+        <div className="rounded-2xl border border-gray-200 bg-white p-6 md:p-8">
+          <div className="mb-6 flex items-start justify-between">
             <div>
-              <h2 className="font-black text-xl text-gray-900">
+              <h2 className="text-xl font-black text-gray-900">
                 {result.orderId}
               </h2>
-              <p className="text-gray-400 text-sm">
+              <p className="text-sm text-gray-400">
                 Placed on{" "}
                 {new Date(result.createdAt).toLocaleDateString("en-IN", {
                   day: "numeric",
@@ -83,7 +82,7 @@ export default function TrackOrder() {
             </div>
             <div className="flex flex-col items-end gap-2">
               <span
-                className={`px-3 py-1 rounded-full text-sm font-bold ${
+                className={`rounded-full px-3 py-1 text-sm font-bold ${
                   result.status === "Delivered"
                     ? "bg-green-100 text-green-700"
                     : result.status === "Dispatched"
@@ -96,19 +95,18 @@ export default function TrackOrder() {
                 {result.status}
               </span>
               <span
-                className={`px-3 py-1 rounded-full text-xs font-bold ${
+                className={`rounded-full px-3 py-1 text-xs font-bold ${
                   result.paymentStatus === "Paid"
                     ? "bg-green-100 text-green-700"
                     : "bg-amber-100 text-amber-800"
                 }`}
               >
-                Payment: {result.paymentStatus}
+                {result.paymentMethod}: {result.paymentStatus}
               </span>
             </div>
           </div>
 
-          {/* Order info */}
-          <div className="bg-gray-50 rounded-xl p-4 mb-6">
+          <div className="mb-6 rounded-xl bg-gray-50 p-4">
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div>
                 <div className="text-gray-400">Product</div>
@@ -137,58 +135,88 @@ export default function TrackOrder() {
             </div>
           </div>
 
-          {(result.razorpayPaymentId || result.razorpayOrderId) && (
-            <div className="bg-white rounded-xl border border-gray-100 p-4 mb-6">
-              <div className="text-gray-400 text-sm font-semibold mb-2">
-                Payment Details
+          <div className="mb-6 rounded-xl border border-gray-100 bg-white p-4">
+            <div className="mb-2 text-sm font-semibold text-gray-400">
+              Payment Details
+            </div>
+            <div className="space-y-2 text-sm">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-gray-500">Method</span>
+                <span className="font-medium text-gray-900">
+                  {result.paymentMethod}
+                </span>
               </div>
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-gray-500">Status</span>
+                <span className="font-medium text-gray-900">
+                  {result.paymentStatus}
+                </span>
+              </div>
+              {result.paymentReference && (
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-gray-500">Reference</span>
+                  <span className="break-all font-mono text-sm text-gray-900">
+                    {result.paymentReference}
+                  </span>
+                </div>
+              )}
               {result.razorpayPaymentId && (
-                <div className="flex items-center justify-between gap-3 mb-2">
-                  <span className="text-gray-500 text-sm">Payment ID</span>
-                  <span className="font-mono text-sm text-gray-900 break-all">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-gray-500">Razorpay Payment ID</span>
+                  <span className="break-all font-mono text-sm text-gray-900">
                     {result.razorpayPaymentId}
                   </span>
                 </div>
               )}
               {result.razorpayOrderId && (
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-gray-500 text-sm">Razorpay Order</span>
-                  <span className="font-mono text-sm text-gray-900 break-all">
+                  <span className="text-gray-500">Razorpay Order ID</span>
+                  <span className="break-all font-mono text-sm text-gray-900">
                     {result.razorpayOrderId}
                   </span>
                 </div>
               )}
             </div>
-          )}
+          </div>
 
-          {/* Status timeline */}
+          {result.paymentMethod === "Google Pay" &&
+            result.paymentStatus === "Pending" && (
+              <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                Google Pay orders stay pending until the payment is confirmed
+                manually. Share the UTR or screenshot after payment so the order
+                can be marked as paid.
+              </div>
+            )}
+
           <div>
-            <h3 className="font-bold text-gray-900 mb-4">Order Timeline</h3>
+            <h3 className="mb-4 font-bold text-gray-900">Order Timeline</h3>
             <div className="space-y-3">
-              {STATUSES.map((s, i) => (
-                <div key={s} className="flex items-center gap-4">
+              {STATUSES.map((status, index) => (
+                <div key={status} className="flex items-center gap-4">
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                      i <= statusIndex ? "bg-[#2DBE6C]" : "bg-gray-200"
+                    className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full ${
+                      index <= statusIndex ? "bg-[#2DBE6C]" : "bg-gray-200"
                     }`}
                   >
-                    {i <= statusIndex ? (
+                    {index <= statusIndex ? (
                       <CheckCircle size={18} className="text-white" />
                     ) : (
                       <Circle size={18} className="text-gray-400" />
                     )}
                   </div>
-                  {i < STATUSES.length - 1 && (
-                    <div className="absolute ml-4 mt-8 w-0.5 h-3 bg-gray-200" />
+                  {index < STATUSES.length - 1 && (
+                    <div className="absolute ml-4 mt-8 h-3 w-0.5 bg-gray-200" />
                   )}
                   <div>
                     <div
-                      className={`font-semibold text-sm ${i <= statusIndex ? "text-gray-900" : "text-gray-400"}`}
+                      className={`text-sm font-semibold ${
+                        index <= statusIndex ? "text-gray-900" : "text-gray-400"
+                      }`}
                     >
-                      {s}
+                      {status}
                     </div>
-                    {i === statusIndex && (
-                      <div className="text-xs text-[#2DBE6C] font-medium">
+                    {index === statusIndex && (
+                      <div className="text-xs font-medium text-[#2DBE6C]">
                         Current Status
                       </div>
                     )}

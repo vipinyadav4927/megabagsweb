@@ -24,104 +24,100 @@ export default function Layout() {
   const location = useLocation();
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Desktop Navbar */}
-      <header className="hidden md:block sticky top-0 z-50">
-        <div className="bg-[#0B3D63] py-1.5 px-4 text-xs text-white/80 flex justify-end gap-6">
+    <div className="flex min-h-screen flex-col bg-gray-50">
+      <header className="sticky top-0 z-50 hidden md:block">
+        <div className="flex justify-end gap-6 bg-[#0B3D63] px-4 py-1.5 text-xs text-white/80">
           <a
             href="tel:+919161722416"
-            className="hover:text-white transition-colors"
+            className="transition-colors hover:text-white"
           >
-            📞 +91 9161722416
+            Call: +91 9161722416
           </a>
           <a
             href="mailto:vipinyadav4926@gmail.com"
-            className="hover:text-white transition-colors"
+            className="transition-colors hover:text-white"
           >
-            ✉ vipinyadav4926@gmail.com
+            Email: vipinyadav4926@gmail.com
           </a>
-          <Link to="/call" className="hover:text-white transition-colors">
+          <Link to="/call" className="transition-colors hover:text-white">
             Call Us
           </Link>
         </div>
-        <nav className="bg-[#0E5A7A] px-6 py-3 flex items-center gap-6">
-          <Link to="/" className="flex items-center gap-2 mr-6">
-            <div className="w-9 h-9 bg-[#F97316] rounded-lg flex items-center justify-center text-white font-black text-lg leading-none">
+        <nav className="flex items-center gap-6 bg-[#0E5A7A] px-6 py-3">
+          <Link to="/" className="mr-6 flex items-center gap-2">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#F97316] text-lg font-black leading-none text-white">
               M
             </div>
             <div>
-              <div className="text-white font-black text-lg leading-tight tracking-wide">
+              <div className="text-lg font-black leading-tight tracking-wide text-white">
                 MEGA BAGS
               </div>
-              <div className="text-white/60 text-[10px] leading-tight">
+              <div className="text-[10px] leading-tight text-white/60">
                 Industrial Packaging
               </div>
             </div>
           </Link>
-          <div className="flex-1 flex items-center gap-1">
-            {navLinks.map((l) => (
+          <div className="flex flex-1 items-center gap-1">
+            {navLinks.map((link) => (
               <Link
-                key={l.to}
-                to={l.to}
-                className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
-                  location.pathname === l.to
+                key={link.to}
+                to={link.to}
+                className={`rounded px-3 py-1.5 text-sm font-medium transition-colors ${
+                  location.pathname === link.to
                     ? "bg-white/20 text-white"
-                    : "text-white/80 hover:text-white hover:bg-white/10"
+                    : "text-white/80 hover:bg-white/10 hover:text-white"
                 }`}
               >
-                {l.label}
+                {link.label}
               </Link>
             ))}
           </div>
           <Link
             to="/call"
-            className="bg-[#2DBE6C] hover:bg-[#26a85e] text-white px-5 py-2 rounded-lg text-sm font-bold transition-colors"
+            className="rounded-lg bg-[#2DBE6C] px-5 py-2 text-sm font-bold text-white transition-colors hover:bg-[#26A85E]"
           >
-            📞 Call Us
+            Call Us
           </Link>
         </nav>
       </header>
 
-      {/* Mobile Navbar */}
-      <header className="md:hidden sticky top-0 z-50 bg-[#0E5A7A] px-4 py-3 flex items-center justify-between">
+      <header className="sticky top-0 z-50 flex items-center justify-between bg-[#0E5A7A] px-4 py-3 md:hidden">
         <Link to="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-[#F97316] rounded-lg flex items-center justify-center text-white font-black text-base">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F97316] text-base font-black text-white">
             M
           </div>
-          <span className="text-white font-black text-base tracking-wide">
+          <span className="text-base font-black tracking-wide text-white">
             MEGA BAGS
           </span>
         </Link>
         <Link
           to="/call"
-          className="bg-[#2DBE6C] text-white px-3 py-1.5 rounded-lg text-xs font-bold"
+          className="rounded-lg bg-[#2DBE6C] px-3 py-1.5 text-xs font-bold text-white"
         >
-          📞 Call Us
+          Call Us
         </Link>
       </header>
 
-      {/* Page content */}
       <main className="flex-1 pb-16 md:pb-0">
         <Outlet />
       </main>
 
-      {/* Footer - desktop only */}
-      <footer className="hidden md:block bg-[#1F2328] text-white pt-12 pb-6">
-        <div className="max-w-6xl mx-auto px-6 grid grid-cols-4 gap-8 mb-8">
+      <footer className="hidden bg-[#1F2328] pb-6 pt-12 text-white md:block">
+        <div className="mx-auto mb-8 grid max-w-6xl grid-cols-4 gap-8 px-6">
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-[#F97316] rounded-lg flex items-center justify-center font-black">
+            <div className="mb-4 flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F97316] font-black">
                 M
               </div>
-              <span className="font-black text-lg">MEGA BAGS</span>
+              <span className="text-lg font-black">MEGA BAGS</span>
             </div>
-            <p className="text-white/60 text-sm leading-relaxed">
+            <p className="text-sm leading-relaxed text-white/60">
               Premium industrial paper bags manufacturer. Trusted by thousands
               of businesses across India.
             </p>
           </div>
           <div>
-            <h4 className="font-bold mb-3 text-white/90">Products</h4>
+            <h4 className="mb-3 font-bold text-white/90">Products</h4>
             <div className="space-y-2 text-sm text-white/60">
               {[
                 "Valve Paper Bags",
@@ -129,20 +125,20 @@ export default function Layout() {
                 "Multiwall Paper Bags",
                 "HDPE Laminated Bags",
                 "Aluminium Foil Bags",
-              ].map((p) => (
-                <div key={p}>
+              ].map((product) => (
+                <div key={product}>
                   <Link
                     to="/products"
-                    className="hover:text-white transition-colors"
+                    className="transition-colors hover:text-white"
                   >
-                    {p}
+                    {product}
                   </Link>
                 </div>
               ))}
             </div>
           </div>
           <div>
-            <h4 className="font-bold mb-3 text-white/90">Company</h4>
+            <h4 className="mb-3 font-bold text-white/90">Company</h4>
             <div className="space-y-2 text-sm text-white/60">
               {(
                 [
@@ -151,40 +147,39 @@ export default function Layout() {
                   ["Place Order", "/order"],
                   ["Track Order", "/track"],
                 ] as [string, string][]
-              ).map(([l, t]) => (
-                <div key={t}>
-                  <Link to={t} className="hover:text-white transition-colors">
-                    {l}
+              ).map(([label, to]) => (
+                <div key={to}>
+                  <Link to={to} className="transition-colors hover:text-white">
+                    {label}
                   </Link>
                 </div>
               ))}
             </div>
           </div>
           <div>
-            <h4 className="font-bold mb-3 text-white/90">Contact</h4>
+            <h4 className="mb-3 font-bold text-white/90">Contact</h4>
             <div className="space-y-2 text-sm text-white/60">
-              <div>📍 Industrial Area, Pune, Maharashtra</div>
-              <div>📞 +91 9161722416</div>
-              <div>✉ vipinyadav4926@gmail.com</div>
-              <div>🕐 Mon–Sat: 9AM–6PM</div>
+              <div>Industrial Area, Pune, Maharashtra</div>
+              <div>+91 9161722416</div>
+              <div>vipinyadav4926@gmail.com</div>
+              <div>Mon-Sat: 9AM-6PM</div>
             </div>
           </div>
         </div>
-        <div className="max-w-6xl mx-auto px-6 border-t border-white/10 pt-6 flex justify-between items-center text-sm text-white/40">
+        <div className="mx-auto flex max-w-6xl items-center justify-between border-t border-white/10 px-6 pt-6 text-sm text-white/40">
           <span>
-            © {new Date().getFullYear()} Mega Bags. All rights reserved.
+            Copyright {new Date().getFullYear()} Mega Bags. All rights reserved.
           </span>
           <span>Manufacturer | Supplier | Exporter</span>
         </div>
       </footer>
 
-      {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 flex">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 flex border-t border-gray-200 bg-white md:hidden">
         {mobileNav.map(({ to, label, icon: Icon }) => (
           <Link
             key={to}
             to={to}
-            className={`flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-[10px] font-medium transition-colors ${
+            className={`flex flex-1 flex-col items-center justify-center gap-0.5 py-2 text-[10px] font-medium transition-colors ${
               location.pathname === to
                 ? "text-[#0E5A7A]"
                 : "text-gray-500 hover:text-[#0E5A7A]"
@@ -201,7 +196,6 @@ export default function Layout() {
         ))}
       </nav>
 
-      {/* Floating Widgets */}
       <WhatsAppButton />
       <ChatBot />
     </div>

@@ -13,6 +13,8 @@ const STATUS_OPTIONS: Order["status"][] = [
   "Delivered",
 ];
 
+const PAYMENT_STATUS_OPTIONS: Order["paymentStatus"][] = ["Pending", "Paid"];
+
 export default function Admin() {
   const {
     products,
@@ -21,6 +23,7 @@ export default function Admin() {
     updateProduct,
     deleteProduct,
     updateOrderStatus,
+    updateOrderPayment,
   } = useApp();
   const [isLoggedIn, setIsLoggedIn] = useState(
     () => sessionStorage.getItem("megabags_admin") === "1",
@@ -28,8 +31,6 @@ export default function Admin() {
   const [loginForm, setLoginForm] = useState({ username: "", password: "" });
   const [loginError, setLoginError] = useState("");
   const [tab, setTab] = useState<"products" | "orders">("products");
-
-  // Product form
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [pForm, setPForm] = useState({
@@ -41,17 +42,17 @@ export default function Admin() {
     category: "",
   });
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleLogin = (event: React.FormEvent) => {
+    event.preventDefault();
     if (
       loginForm.username === ADMIN_USER &&
       loginForm.password === ADMIN_PASS
     ) {
       sessionStorage.setItem("megabags_admin", "1");
       setIsLoggedIn(true);
-    } else {
-      setLoginError("Invalid username or password");
+      return;
     }
+    setLoginError("Invalid username or password");
   };
 
   const handleLogout = () => {
@@ -72,31 +73,34 @@ export default function Admin() {
     setShowAddForm(true);
   };
 
-  const openEditForm = (p: Product) => {
-    const images = p.images?.length
-      ? p.images
-      : p.imageUrl
-        ? [p.imageUrl]
+  const openEditForm = (product: Product) => {
+    const images = product.images?.length
+      ? product.images
+      : product.imageUrl
+        ? [product.imageUrl]
         : [];
+
     setPForm({
-      name: p.name,
+      name: product.name,
       imageUrl: images.join(", "),
-      description: p.description,
-      specs: p.specs,
-      applications: p.applications,
-      category: p.category,
+      description: product.description,
+      specs: product.specs,
+      applications: product.applications,
+      category: product.category,
     });
-    setEditingProduct(p);
+    setEditingProduct(product);
     setShowAddForm(true);
   };
 
   const handleSaveProduct = () => {
     if (!pForm.name) return;
+
     const imageList = pForm.imageUrl
       .split(",")
-      .map((s) => s.trim())
+      .map((value) => value.trim())
       .filter(Boolean);
     const mainImage = imageList[0] ?? "";
+
     if (editingProduct) {
       updateProduct({
         ...editingProduct,
@@ -111,33 +115,40 @@ export default function Admin() {
         images: imageList,
       });
     }
+
     setShowAddForm(false);
     setEditingProduct(null);
   };
 
-  const statusColor = (s: Order["status"]) => {
-    if (s === "Delivered") return "bg-green-100 text-green-700";
-    if (s === "Dispatched") return "bg-blue-100 text-blue-700";
-    if (s === "Processing") return "bg-yellow-100 text-yellow-700";
+  const statusColor = (status: Order["status"]) => {
+    if (status === "Delivered") return "bg-green-100 text-green-700";
+    if (status === "Dispatched") return "bg-blue-100 text-blue-700";
+    if (status === "Processing") return "bg-yellow-100 text-yellow-700";
     return "bg-gray-100 text-gray-700";
+  };
+
+  const paymentStatusColor = (status: Order["paymentStatus"]) => {
+    return status === "Paid"
+      ? "bg-green-100 text-green-700"
+      : "bg-amber-100 text-amber-800";
   };
 
   if (!isLoggedIn)
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-sm">
-          <div className="text-center mb-6">
-            <div className="w-14 h-14 bg-[#0E5A7A] rounded-2xl flex items-center justify-center mx-auto mb-3">
-              <span className="text-white font-black text-2xl">M</span>
+      <div className="flex min-h-screen items-center justify-center bg-gray-100 p-4">
+        <div className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-xl">
+          <div className="mb-6 text-center">
+            <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#0E5A7A]">
+              <span className="text-2xl font-black text-white">M</span>
             </div>
             <h1 className="text-xl font-black text-gray-900">Admin Panel</h1>
-            <p className="text-gray-400 text-sm">Mega Bags Management</p>
+            <p className="text-sm text-gray-400">Mega Bags Management</p>
           </div>
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <label
                 htmlFor="admin-username"
-                className="block text-sm font-semibold text-gray-700 mb-1.5"
+                className="mb-1.5 block text-sm font-semibold text-gray-700"
               >
                 Username
               </label>
@@ -145,17 +156,20 @@ export default function Admin() {
                 id="admin-username"
                 type="text"
                 value={loginForm.username}
-                onChange={(e) =>
-                  setLoginForm((p) => ({ ...p, username: e.target.value }))
+                onChange={(event) =>
+                  setLoginForm((prev) => ({
+                    ...prev,
+                    username: event.target.value,
+                  }))
                 }
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0E5A7A]/30"
+                className="w-full rounded-xl border border-gray-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#0E5A7A]/30"
                 placeholder="admin"
               />
             </div>
             <div>
               <label
                 htmlFor="admin-password"
-                className="block text-sm font-semibold text-gray-700 mb-1.5"
+                className="mb-1.5 block text-sm font-semibold text-gray-700"
               >
                 Password
               </label>
@@ -163,17 +177,20 @@ export default function Admin() {
                 id="admin-password"
                 type="password"
                 value={loginForm.password}
-                onChange={(e) =>
-                  setLoginForm((p) => ({ ...p, password: e.target.value }))
+                onChange={(event) =>
+                  setLoginForm((prev) => ({
+                    ...prev,
+                    password: event.target.value,
+                  }))
                 }
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0E5A7A]/30"
-                placeholder="••••••••"
+                className="w-full rounded-xl border border-gray-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#0E5A7A]/30"
+                placeholder="Enter password"
               />
             </div>
-            {loginError && <p className="text-red-500 text-sm">{loginError}</p>}
+            {loginError && <p className="text-sm text-red-500">{loginError}</p>}
             <button
               type="submit"
-              className="w-full bg-[#0E5A7A] hover:bg-[#0a4a66] text-white py-3 rounded-xl font-bold transition-colors"
+              className="w-full rounded-xl bg-[#0E5A7A] py-3 font-bold text-white transition-colors hover:bg-[#0A4A66]"
             >
               Login
             </button>
@@ -184,66 +201,64 @@ export default function Admin() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Admin header */}
-      <header className="bg-[#0E5A7A] px-6 py-4 flex items-center justify-between">
+      <header className="flex items-center justify-between bg-[#0E5A7A] px-6 py-4">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-[#F97316] rounded-lg flex items-center justify-center text-white font-black">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F97316] font-black text-white">
             M
           </div>
           <div>
-            <span className="text-white font-black">MEGA BAGS</span>
-            <span className="text-white/60 text-xs ml-2">Admin Panel</span>
+            <span className="font-black text-white">MEGA BAGS</span>
+            <span className="ml-2 text-xs text-white/60">Admin Panel</span>
           </div>
         </div>
         <button
           type="button"
           onClick={handleLogout}
-          className="flex items-center gap-2 text-white/80 hover:text-white text-sm"
+          className="flex items-center gap-2 text-sm text-white/80 hover:text-white"
         >
           <LogOut size={16} /> Logout
         </button>
       </header>
 
-      <div className="max-w-5xl mx-auto px-4 py-8">
-        {/* Tabs */}
-        <div className="flex gap-3 mb-8">
-          {(["products", "orders"] as const).map((t) => (
+      <div className="mx-auto max-w-5xl px-4 py-8">
+        <div className="mb-8 flex gap-3">
+          {(["products", "orders"] as const).map((currentTab) => (
             <button
               type="button"
-              key={t}
-              onClick={() => setTab(t)}
-              className={`px-6 py-2.5 rounded-lg font-semibold capitalize transition-colors ${
-                tab === t
+              key={currentTab}
+              onClick={() => setTab(currentTab)}
+              className={`rounded-lg px-6 py-2.5 font-semibold capitalize transition-colors ${
+                tab === currentTab
                   ? "bg-[#0E5A7A] text-white"
-                  : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
+                  : "border border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
               }`}
             >
-              {t}{" "}
-              {t === "products" ? `(${products.length})` : `(${orders.length})`}
+              {currentTab}{" "}
+              {currentTab === "products"
+                ? `(${products.length})`
+                : `(${orders.length})`}
             </button>
           ))}
         </div>
 
-        {/* Products tab */}
         {tab === "products" && (
           <div>
-            <div className="flex justify-between items-center mb-4">
+            <div className="mb-4 flex items-center justify-between">
               <h2 className="text-xl font-black text-gray-900">
                 Product Management
               </h2>
               <button
                 type="button"
                 onClick={openAddForm}
-                className="flex items-center gap-2 bg-[#2DBE6C] hover:bg-[#26a85e] text-white px-4 py-2 rounded-lg font-semibold text-sm transition-colors"
+                className="flex items-center gap-2 rounded-lg bg-[#2DBE6C] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#26A85E]"
               >
                 <Plus size={16} /> Add Product
               </button>
             </div>
 
-            {/* Add/Edit form */}
             {showAddForm && (
-              <div className="bg-white border border-gray-200 rounded-xl p-6 mb-4">
-                <div className="flex justify-between items-center mb-4">
+              <div className="mb-4 rounded-xl border border-gray-200 bg-white p-6">
+                <div className="mb-4 flex items-center justify-between">
                   <h3 className="font-bold text-gray-900">
                     {editingProduct ? "Edit Product" : "Add New Product"}
                   </h3>
@@ -255,7 +270,8 @@ export default function Admin() {
                     <X size={20} />
                   </button>
                 </div>
-                <div className="grid md:grid-cols-2 gap-4">
+
+                <div className="grid gap-4 md:grid-cols-2">
                   {(
                     [
                       "name",
@@ -268,25 +284,30 @@ export default function Admin() {
                     <div key={field}>
                       <label
                         htmlFor={`pform-${field}`}
-                        className="block text-xs font-semibold text-gray-500 mb-1 uppercase"
+                        className="mb-1 block text-xs font-semibold uppercase text-gray-500"
                       >
-                    {field === "imageUrl" ? "Image URLs (comma separated)" : field}
+                        {field === "imageUrl"
+                          ? "Image URLs (comma separated)"
+                          : field}
                       </label>
                       <input
                         id={`pform-${field}`}
                         type="text"
                         value={pForm[field]}
-                        onChange={(e) =>
-                          setPForm((p) => ({ ...p, [field]: e.target.value }))
+                        onChange={(event) =>
+                          setPForm((prev) => ({
+                            ...prev,
+                            [field]: event.target.value,
+                          }))
                         }
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0E5A7A]/30"
+                        className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0E5A7A]/30"
                       />
                     </div>
                   ))}
                   <div className="md:col-span-2">
                     <label
                       htmlFor="pform-description"
-                      className="block text-xs font-semibold text-gray-500 mb-1 uppercase"
+                      className="mb-1 block text-xs font-semibold uppercase text-gray-500"
                     >
                       Description
                     </label>
@@ -294,25 +315,29 @@ export default function Admin() {
                       id="pform-description"
                       rows={3}
                       value={pForm.description}
-                      onChange={(e) =>
-                        setPForm((p) => ({ ...p, description: e.target.value }))
+                      onChange={(event) =>
+                        setPForm((prev) => ({
+                          ...prev,
+                          description: event.target.value,
+                        }))
                       }
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0E5A7A]/30 resize-none"
+                      className="w-full resize-none rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0E5A7A]/30"
                     />
                   </div>
                 </div>
-                <div className="flex gap-3 mt-4 justify-end">
+
+                <div className="mt-4 flex justify-end gap-3">
                   <button
                     type="button"
                     onClick={() => setShowAddForm(false)}
-                    className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium"
+                    className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium"
                   >
                     Cancel
                   </button>
                   <button
                     type="button"
                     onClick={handleSaveProduct}
-                    className="flex items-center gap-2 bg-[#0E5A7A] text-white px-4 py-2 rounded-lg text-sm font-semibold"
+                    className="flex items-center gap-2 rounded-lg bg-[#0E5A7A] px-4 py-2 text-sm font-semibold text-white"
                   >
                     <Check size={16} /> Save
                   </button>
@@ -321,34 +346,36 @@ export default function Admin() {
             )}
 
             <div className="space-y-3">
-              {products.map((p) => (
+              {products.map((product) => (
                 <div
-                  key={p.id}
-                  className="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-4"
+                  key={product.id}
+                  className="flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-4"
                 >
                   <img
-                    src={p.imageUrl}
-                    alt={p.name}
-                    className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
+                    src={product.imageUrl}
+                    alt={product.name}
+                    className="h-16 w-16 flex-shrink-0 rounded-lg object-cover"
                   />
-                  <div className="flex-1 min-w-0">
-                    <div className="font-bold text-gray-900">{p.name}</div>
-                    <div className="text-gray-400 text-sm truncate">
-                      {p.description}
+                  <div className="min-w-0 flex-1">
+                    <div className="font-bold text-gray-900">
+                      {product.name}
+                    </div>
+                    <div className="truncate text-sm text-gray-400">
+                      {product.description}
                     </div>
                   </div>
                   <div className="flex gap-2">
                     <button
                       type="button"
-                      onClick={() => openEditForm(p)}
-                      className="p-2 text-[#0E5A7A] hover:bg-blue-50 rounded-lg"
+                      onClick={() => openEditForm(product)}
+                      className="rounded-lg p-2 text-[#0E5A7A] hover:bg-blue-50"
                     >
                       <Pencil size={16} />
                     </button>
                     <button
                       type="button"
-                      onClick={() => deleteProduct(p.id)}
-                      className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                      onClick={() => deleteProduct(product.id)}
+                      className="rounded-lg p-2 text-red-500 hover:bg-red-50"
                     >
                       <Trash2 size={16} />
                     </button>
@@ -359,79 +386,121 @@ export default function Admin() {
           </div>
         )}
 
-        {/* Orders tab */}
         {tab === "orders" && (
           <div>
-            <h2 className="text-xl font-black text-gray-900 mb-4">
+            <h2 className="mb-4 text-xl font-black text-gray-900">
               Order Management ({orders.length} orders)
             </h2>
             {orders.length === 0 ? (
-              <div className="text-center py-16 text-gray-400">
-                <div className="text-4xl mb-3">📦</div>
+              <div className="py-16 text-center text-gray-400">
                 <p>No orders yet</p>
               </div>
             ) : (
               <div className="space-y-3">
-                {[...orders].reverse().map((o) => (
+                {[...orders].reverse().map((order) => (
                   <div
-                    key={o.orderId}
-                    className="bg-white border border-gray-200 rounded-xl p-5"
+                    key={order.orderId}
+                    className="rounded-xl border border-gray-200 bg-white p-5"
                   >
-                    <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
-                      <div>
-                        <span className="font-black text-gray-900 text-lg">
-                          {o.orderId}
+                    <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-lg font-black text-gray-900">
+                          {order.orderId}
                         </span>
                         <span
-                          className={`ml-3 px-2 py-0.5 rounded-full text-xs font-bold ${statusColor(o.status)}`}
+                          className={`rounded-full px-2 py-0.5 text-xs font-bold ${statusColor(order.status)}`}
                         >
-                          {o.status}
+                          {order.status}
+                        </span>
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-xs font-bold ${paymentStatusColor(order.paymentStatus)}`}
+                        >
+                          {order.paymentMethod}: {order.paymentStatus}
                         </span>
                       </div>
-                      <div className="text-gray-400 text-xs">
-                        {new Date(o.createdAt).toLocaleString("en-IN")}
+                      <div className="text-xs text-gray-400">
+                        {new Date(order.createdAt).toLocaleString("en-IN")}
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm mb-4">
+
+                    <div className="mb-4 grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
                       <div>
                         <span className="text-gray-400">Customer: </span>
-                        <span className="font-medium">{o.customerName}</span>
+                        <span className="font-medium">
+                          {order.customerName}
+                        </span>
                       </div>
                       <div>
                         <span className="text-gray-400">Phone: </span>
-                        <span className="font-medium">{o.phone}</span>
+                        <span className="font-medium">{order.phone}</span>
                       </div>
                       <div>
                         <span className="text-gray-400">Product: </span>
-                        <span className="font-medium">{o.productName}</span>
+                        <span className="font-medium">{order.productName}</span>
                       </div>
                       <div>
                         <span className="text-gray-400">Qty: </span>
                         <span className="font-medium">
-                          {o.quantity.toLocaleString()} bags
+                          {order.quantity.toLocaleString()} bags
                         </span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-sm text-gray-500">
-                        Update Status:
-                      </span>
-                      <select
-                        value={o.status}
-                        onChange={(e) =>
-                          updateOrderStatus(
-                            o.orderId,
-                            e.target.value as Order["status"],
-                          )
-                        }
-                        className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0E5A7A]/30"
-                      >
-                        {STATUS_OPTIONS.map((s) => (
-                          <option key={s} value={s}>
-                            {s}
-                          </option>
-                        ))}
-                      </select>
+
+                    {order.paymentReference && (
+                      <div className="mb-4 rounded-lg bg-gray-50 px-4 py-3 text-sm">
+                        <span className="text-gray-500">
+                          Payment Reference:{" "}
+                        </span>
+                        <span className="break-all font-mono text-gray-900">
+                          {order.paymentReference}
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="grid gap-3 md:grid-cols-2">
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm text-gray-500">
+                          Update Status:
+                        </span>
+                        <select
+                          value={order.status}
+                          onChange={(event) =>
+                            updateOrderStatus(
+                              order.orderId,
+                              event.target.value as Order["status"],
+                            )
+                          }
+                          className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0E5A7A]/30"
+                        >
+                          {STATUS_OPTIONS.map((status) => (
+                            <option key={status} value={status}>
+                              {status}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm text-gray-500">
+                          Payment Status:
+                        </span>
+                        <select
+                          value={order.paymentStatus}
+                          onChange={(event) =>
+                            updateOrderPayment(
+                              order.orderId,
+                              event.target.value as Order["paymentStatus"],
+                            )
+                          }
+                          className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0E5A7A]/30"
+                        >
+                          {PAYMENT_STATUS_OPTIONS.map((status) => (
+                            <option key={status} value={status}>
+                              {status}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
                   </div>
                 ))}

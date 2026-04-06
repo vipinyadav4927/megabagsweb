@@ -9,28 +9,26 @@ export default function Contact() {
   });
   const [sent, setSent] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
     setSent(true);
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-10">
+    <div className="mx-auto max-w-6xl px-6 py-10">
       <div className="mb-8">
-        <h1 className="text-3xl font-black text-gray-900 mb-2">Contact Us</h1>
-        <div className="w-16 h-1 bg-[#F97316] rounded" />
+        <h1 className="text-3xl font-black text-gray-900">Contact Us</h1>
+        <div className="h-1 w-16 rounded bg-[#F97316]" />
       </div>
 
-      <div className="grid md:grid-cols-2 gap-10">
-        {/* Form */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">
+      <div className="grid gap-10 md:grid-cols-2">
+        <div className="rounded-2xl border border-gray-200 bg-white p-6 md:p-8">
+          <h2 className="mb-6 text-xl font-bold text-gray-900">
             Send a Message
           </h2>
           {sent ? (
-            <div className="text-center py-10">
-              <div className="text-5xl mb-4">✅</div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
+            <div className="py-10 text-center">
+              <h3 className="mb-2 text-xl font-bold text-gray-900">
                 Message Sent!
               </h3>
               <p className="text-gray-500">
@@ -43,7 +41,7 @@ export default function Contact() {
                 <div key={id}>
                   <label
                     htmlFor={`cf-${id}`}
-                    className="block text-sm font-semibold text-gray-700 mb-1.5 capitalize"
+                    className="mb-1.5 block text-sm font-semibold capitalize text-gray-700"
                   >
                     {id} *
                   </label>
@@ -54,17 +52,20 @@ export default function Contact() {
                     }
                     required
                     value={(form as Record<string, string>)[id]}
-                    onChange={(e) =>
-                      setForm((prev) => ({ ...prev, [id]: e.target.value }))
+                    onChange={(event) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        [id]: event.target.value,
+                      }))
                     }
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0E5A7A]/30"
+                    className="w-full rounded-xl border border-gray-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#0E5A7A]/30"
                   />
                 </div>
               ))}
               <div>
                 <label
                   htmlFor="contact-message"
-                  className="block text-sm font-semibold text-gray-700 mb-1.5"
+                  className="mb-1.5 block text-sm font-semibold text-gray-700"
                 >
                   Message *
                 </label>
@@ -73,15 +74,18 @@ export default function Contact() {
                   required
                   rows={4}
                   value={form.message}
-                  onChange={(e) =>
-                    setForm((prev) => ({ ...prev, message: e.target.value }))
+                  onChange={(event) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      message: event.target.value,
+                    }))
                   }
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0E5A7A]/30 resize-none"
+                  className="w-full resize-none rounded-xl border border-gray-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#0E5A7A]/30"
                 />
               </div>
               <button
                 type="submit"
-                className="w-full bg-[#0E5A7A] hover:bg-[#0a4a66] text-white py-3 rounded-xl font-bold transition-colors"
+                className="w-full rounded-xl bg-[#0E5A7A] py-3 font-bold text-white transition-colors hover:bg-[#0A4A66]"
               >
                 Send Message
               </button>
@@ -89,43 +93,32 @@ export default function Contact() {
           )}
         </div>
 
-        {/* Info */}
         <div className="space-y-6">
-          <div className="bg-[#0E5A7A] text-white rounded-2xl p-6">
-            <h2 className="text-xl font-bold mb-4">Contact Information</h2>
+          <div className="rounded-2xl bg-[#0E5A7A] p-6 text-white">
+            <h2 className="mb-4 text-xl font-bold">Contact Information</h2>
             <div className="space-y-4">
               {[
                 {
-                  icon: "📍",
                   label: "Address",
                   value:
                     "Plot No. 45, Industrial Area, Bhosari, Pune - 411026, Maharashtra",
                 },
-                { icon: "📞", label: "Phone", value: "+91 9161722416" },
+                { label: "Phone", value: "+91 9161722416" },
+                { label: "Email", value: "vipinyadav4926@gmail.com" },
                 {
-                  icon: "✉",
-                  label: "Email",
-                  value: "vipinyadav4926@gmail.com",
-                },
-                {
-                  icon: "🕐",
                   label: "Working Hours",
-                  value: "Monday – Saturday: 9:00 AM – 6:00 PM",
+                  value: "Monday - Saturday: 9:00 AM - 6:00 PM",
                 },
-              ].map(({ icon, label, value }) => (
-                <div key={label} className="flex gap-3">
-                  <span className="text-xl">{icon}</span>
-                  <div>
-                    <div className="text-white/60 text-xs mb-0.5">{label}</div>
-                    <div className="text-sm font-medium">{value}</div>
-                  </div>
+              ].map(({ label, value }) => (
+                <div key={label}>
+                  <div className="mb-0.5 text-xs text-white/60">{label}</div>
+                  <div className="text-sm font-medium">{value}</div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Map */}
-          <div className="rounded-2xl overflow-hidden border border-gray-200 h-64">
+          <div className="h-64 overflow-hidden rounded-2xl border border-gray-200">
             <iframe
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3781.174!2d73.8477!3d18.6298!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTjCsDM3JzQ3LjMiTiA3M8KwNTAnNTEuNyJF!5e0!3m2!1sen!2sin!4v1234567890"
               width="100%"
