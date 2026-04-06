@@ -1,5 +1,6 @@
 import { Home, MapPin, Package, Phone, ShoppingCart } from "lucide-react";
 import { Link, Outlet, useLocation } from "react-router-dom";
+import BrandLogo from "./BrandLogo";
 import ChatBot from "./ChatBot";
 import WhatsAppButton from "./WhatsAppButton";
 
@@ -44,18 +45,8 @@ export default function Layout() {
           </Link>
         </div>
         <nav className="flex items-center gap-6 bg-[#0E5A7A] px-6 py-3">
-          <Link to="/" className="mr-6 flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#F97316] text-lg font-black leading-none text-white">
-              M
-            </div>
-            <div>
-              <div className="text-lg font-black leading-tight tracking-wide text-white">
-                MEGA BAGS
-              </div>
-              <div className="text-[10px] leading-tight text-white/60">
-                Industrial Packaging
-              </div>
-            </div>
+          <Link to="/" className="mr-4 block">
+            <BrandLogo variant="nav" />
           </Link>
           <div className="flex flex-1 items-center gap-1">
             {navLinks.map((link) => (
@@ -82,13 +73,8 @@ export default function Layout() {
       </header>
 
       <header className="sticky top-0 z-50 flex items-center justify-between bg-[#0E5A7A] px-4 py-3 md:hidden">
-        <Link to="/" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F97316] text-base font-black text-white">
-            M
-          </div>
-          <span className="text-base font-black tracking-wide text-white">
-            MEGA BAGS
-          </span>
+        <Link to="/" className="block">
+          <BrandLogo variant="mobile" />
         </Link>
         <Link
           to="/call"
@@ -105,15 +91,10 @@ export default function Layout() {
       <footer className="hidden bg-[#1F2328] pb-6 pt-12 text-white md:block">
         <div className="mx-auto mb-8 grid max-w-6xl grid-cols-4 gap-8 px-6">
           <div>
-            <div className="mb-4 flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F97316] font-black">
-                M
-              </div>
-              <span className="text-lg font-black">MEGA BAGS</span>
-            </div>
+            <BrandLogo variant="footer" className="mb-4 border-white/10" />
             <p className="text-sm leading-relaxed text-white/60">
-              Premium industrial paper bags manufacturer. Trusted by thousands
-              of businesses across India.
+              Carries your trust with premium industrial paper bags,
+              dependable bulk supply, and responsive service across India.
             </p>
           </div>
           <div>
