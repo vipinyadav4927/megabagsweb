@@ -22,6 +22,7 @@ type OrderUpdate = Pick<
 
 const VISITOR_ID_KEY = "megabags_visitor_id";
 const SESSION_ID_KEY = "megabags_session_id";
+const LAST_EMAIL_KEY = "megabags_last_email";
 
 function normalizeRuntimeValue(value?: string): string | undefined {
   if (!value) return undefined;
@@ -96,33 +97,97 @@ function buildUrl(baseUrl: string, params: Record<string, string>) {
   return url.toString();
 }
 
+function getStoredVisitorEmail() {
+  return safeStorageGet(localStorage, LAST_EMAIL_KEY)?.trim() || "";
+}
+
+export function rememberVisitorEmail(email?: string) {
+  const normalizedEmail = email?.trim().toLowerCase();
+  if (!normalizedEmail) {
+    return;
+  }
+
+  safeStorageSet(localStorage, LAST_EMAIL_KEY, normalizedEmail);
+}
+
+function submitWebhookForm(webhookUrl: string, payload: object) {
+  return new Promise<boolean>((resolve) => {
+    if (!document.body) {
+      resolve(false);
+      return;
+    }
+
+    const frameName = `megabagsSheetsFrame_${Date.now()}_${Math.round(
+      Math.random() * 1_000,
+    )}`;
+    const iframe = document.createElement("iframe");
+    iframe.name = frameName;
+    iframe.tabIndex = -1;
+    iframe.setAttribute("aria-hidden", "true");
+    iframe.style.display = "none";
+
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = webhookUrl;
+    form.target = frameName;
+    form.style.display = "none";
+
+    const input = document.createElement("input");
+    input.type = "hidden";
+    input.name = "payload";
+    input.value = JSON.stringify(payload);
+    form.appendChild(input);
+
+    document.body.append(iframe, form);
+    form.submit();
+
+    window.setTimeout(() => {
+      form.remove();
+      iframe.remove();
+      resolve(true);
+    }, 2_500);
+  });
+}
+
+function sendVisitBeacon(webhookUrl: string, visit: Record<string, string>) {
+  return new Promise<boolean>((resolve) => {
+    const image = new Image();
+    let settled = false;
+
+    const finish = (ok: boolean) => {
+      if (settled) {
+        return;
+      }
+
+      settled = true;
+      window.clearTimeout(timeoutId);
+      image.onload = null;
+      image.onerror = null;
+      resolve(ok);
+    };
+
+    const timeoutId = window.setTimeout(() => {
+      finish(true);
+    }, 4_000);
+
+    image.onload = () => finish(true);
+    image.onerror = () => finish(false);
+    image.src = buildUrl(webhookUrl, {
+      action: "logVisit",
+      ...visit,
+      _: Date.now().toString(),
+    });
+  });
+}
+
 async function postWebhook(payload: object) {
   const config = await getSheetsConfig();
   if (!config) {
     return false;
   }
 
-  const body = JSON.stringify(payload);
-  const blob = new Blob([body], {
-    type: "text/plain;charset=UTF-8",
-  });
-
   try {
-    if (navigator.sendBeacon?.(config.webhookUrl, blob)) {
-      return true;
-    }
-
-    await fetch(config.webhookUrl, {
-      method: "POST",
-      mode: "no-cors",
-      keepalive: true,
-      headers: {
-        "Content-Type": "text/plain;charset=UTF-8",
-      },
-      body,
-    });
-
-    return true;
+    return await submitWebhookForm(config.webhookUrl, payload);
   } catch {
     return false;
   }
@@ -202,27 +267,30 @@ function normalizeOrder(remoteOrder: RemoteOrder | null | undefined): Order | nu
 }
 
 export async function logWebsiteVisit(pagePath: string) {
-  const { visitorId, sessionId } = getTrackingIds();
+  const config = await getSheetsConfig();
+  if (!config) {
+    return false;
+  }
 
-  return postWebhook({
-    action: "logVisit",
-    visit: {
-      visitorId,
-      sessionId,
-      pagePath,
-      pageTitle: document.title || "Mega Bags",
-      pageUrl: window.location.href,
-      referrer: document.referrer || "",
-      language: navigator.language || "",
-      screenSize: `${window.screen.width}x${window.screen.height}`,
-      userAgent: navigator.userAgent,
-      visitedAt: new Date().toISOString(),
-    },
+  const { visitorId, sessionId } = getTrackingIds();
+  return sendVisitBeacon(config.webhookUrl, {
+    visitorId,
+    sessionId,
+    visitorEmail: getStoredVisitorEmail(),
+    pagePath,
+    pageTitle: document.title || "Mega Bags",
+    pageUrl: window.location.href,
+    referrer: document.referrer || "",
+    language: navigator.language || "",
+    screenSize: `${window.screen.width}x${window.screen.height}`,
+    userAgent: navigator.userAgent,
+    visitedAt: new Date().toISOString(),
   });
 }
 
 export async function saveOrderToGoogleSheets(order: Order) {
   const { visitorId, sessionId } = getTrackingIds();
+  rememberVisitorEmail(order.email);
 
   return postWebhook({
     action: "createOrder",

@@ -5,6 +5,7 @@ var ADMIN_KEY = "CHANGE_THIS_ADMIN_KEY";
 var VISITS_HEADERS = [
   "visitor_id",
   "session_id",
+  "visitor_email",
   "visited_at",
   "page_path",
   "page_title",
@@ -43,6 +44,11 @@ function doGet(e) {
   var action = getParam_(e, "action", "health");
 
   try {
+    if (action === "logVisit") {
+      appendVisit_(visitFromGetParams_(e));
+      return respond_(e, { ok: true });
+    }
+
     if (action === "trackOrder") {
       var orderId = normalizeOrderId_(getParam_(e, "orderId", ""));
       return respond_(e, {
@@ -108,8 +114,19 @@ function doPost(e) {
 }
 
 function parsePayload_(e) {
+  var payloadParam =
+    e && e.parameter && e.parameter.payload ? e.parameter.payload : "";
   var contents =
-    e && e.postData && e.postData.contents ? e.postData.contents : "{}";
+    e && e.postData && e.postData.contents ? e.postData.contents : "";
+
+  if (payloadParam) {
+    return JSON.parse(payloadParam);
+  }
+
+  if (!contents) {
+    return {};
+  }
+
   return JSON.parse(contents);
 }
 
@@ -117,7 +134,7 @@ function getSpreadsheet_() {
   var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
   if (!spreadsheet) {
     throw new Error(
-      "Active spreadsheet nahi mila. Is code ko target Google Sheet ke bound Apps Script me paste kijiye.",
+      "Active spreadsheet was not found. Paste this code into the Apps Script project bound to your target Google Sheet.",
     );
   }
   return spreadsheet;
@@ -155,6 +172,7 @@ function appendVisit_(visit) {
   sheet.appendRow([
     safeText_(visit.visitorId),
     safeText_(visit.sessionId),
+    safeText_(visit.visitorEmail),
     safeText_(visit.visitedAt),
     safeText_(visit.pagePath),
     safeText_(visit.pageTitle),
@@ -171,7 +189,7 @@ function upsertOrder_(order) {
   var normalizedOrderId = normalizeOrderId_(order.orderId);
 
   if (!normalizedOrderId) {
-    throw new Error("orderId missing hai.");
+    throw new Error("orderId is missing.");
   }
 
   var rowIndex = findOrderRowIndex_(sheet, normalizedOrderId);
@@ -345,6 +363,22 @@ function requireAdminKey_(key) {
   if (safeText_(key) !== ADMIN_KEY) {
     throw new Error("Invalid admin key.");
   }
+}
+
+function visitFromGetParams_(e) {
+  return {
+    visitorId: getParam_(e, "visitorId", ""),
+    sessionId: getParam_(e, "sessionId", ""),
+    visitorEmail: getParam_(e, "visitorEmail", ""),
+    visitedAt: getParam_(e, "visitedAt", ""),
+    pagePath: getParam_(e, "pagePath", ""),
+    pageTitle: getParam_(e, "pageTitle", ""),
+    pageUrl: getParam_(e, "pageUrl", ""),
+    referrer: getParam_(e, "referrer", ""),
+    language: getParam_(e, "language", ""),
+    screenSize: getParam_(e, "screenSize", ""),
+    userAgent: getParam_(e, "userAgent", ""),
+  };
 }
 
 function normalizeOrderId_(value) {

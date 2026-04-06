@@ -7,6 +7,7 @@ import {
 } from "react";
 import {
   fetchAllOrdersFromGoogleSheets,
+  rememberVisitorEmail,
   saveOrderToGoogleSheets,
   updateOrderInGoogleSheets,
 } from "../services/googleSheets";
@@ -262,6 +263,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       createdAt: new Date().toISOString(),
     };
 
+    rememberVisitorEmail(newOrder.email);
     setOrders((prev) => [...prev, newOrder]);
     void saveOrderToGoogleSheets(newOrder).catch((error) => {
       console.warn("Order could not be saved to Google Sheets.", error);

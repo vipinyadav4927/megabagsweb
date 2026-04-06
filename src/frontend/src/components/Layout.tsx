@@ -91,7 +91,7 @@ export default function Layout() {
       <footer className="hidden bg-[#1F2328] pb-6 pt-12 text-white md:block">
         <div className="mx-auto mb-8 grid max-w-6xl grid-cols-4 gap-8 px-6">
           <div>
-            <BrandLogo variant="footer" className="mb-4 border-white/10" />
+            <BrandLogo variant="footer" className="mb-4" />
             <p className="text-sm leading-relaxed text-white/60">
               Carries your trust with premium industrial paper bags,
               dependable bulk supply, and responsive service across India.
