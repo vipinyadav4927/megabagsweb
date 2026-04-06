@@ -1,53 +1,22 @@
 import {
-  AlertCircle,
   CheckCircle,
   CreditCard,
   Lock,
-  RefreshCw,
   ShieldCheck,
   Smartphone,
   Wallet,
 } from "lucide-react";
 import { useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useApp } from "../context/AppContext";
-import {
-  PAYMENT_CONFIG,
-  buildGooglePayLink,
-  buildUpiFallbackLink,
-  isGooglePayConfigured,
-} from "../paymentConfig";
-
-declare global {
-  interface Window {
-    Razorpay: new (options: Record<string, unknown>) => { open(): void };
-  }
-}
+import { PAYMENT_CONFIG } from "../paymentConfig";
 
 type CheckoutResult = {
   orderId: string;
   paymentMethod: "Razorpay" | "Google Pay";
   paymentStatus: "Paid" | "Pending";
   paymentReference?: string;
-  paymentLink?: string;
-  fallbackLink?: string;
 };
-
-function loadRazorpayScript(): Promise<boolean> {
-  return new Promise((resolve) => {
-    if (document.getElementById("razorpay-script")) {
-      resolve(true);
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.id = "razorpay-script";
-    script.src = "https://checkout.razorpay.com/v1/checkout.js";
-    script.onload = () => resolve(true);
-    script.onerror = () => resolve(false);
-    document.body.appendChild(script);
-  });
-}
 
 export default function PlaceOrder() {
   const { products, addOrder } = useApp();
@@ -63,10 +32,7 @@ export default function PlaceOrder() {
     notes: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [paymentError, setPaymentError] = useState("");
-  const [processingMethod, setProcessingMethod] = useState<
-    "razorpay" | "gpay" | null
-  >(null);
+  const [processingMethod, setProcessingMethod] = useState<"gpay" | null>(null);
   const [checkoutResult, setCheckoutResult] = useState<CheckoutResult | null>(
     null,
   );
@@ -92,7 +58,6 @@ export default function PlaceOrder() {
 
   const qty = Number.parseInt(form.quantity, 10) || 0;
   const estimatedAmount = qty * PAYMENT_CONFIG.pricePerBag;
-  const googlePayReady = isGooglePayConfigured();
 
   const validateBeforePayment = () => {
     const nextErrors = validate();
@@ -119,112 +84,23 @@ export default function PlaceOrder() {
     });
   };
 
-  const openRazorpay = async () => {
-    if (!validateBeforePayment()) return;
-
-    setPaymentError("");
-    setProcessingMethod("razorpay");
-
-    const loaded = await loadRazorpayScript();
-    if (!loaded) {
-      setPaymentError(
-        "Failed to load the payment gateway. Please check your internet connection.",
-      );
-      setProcessingMethod(null);
-      return;
-    }
-
-    const amountInPaise = Math.min(estimatedAmount * 100, 50000000);
-
-    const options: Record<string, unknown> = {
-      key: PAYMENT_CONFIG.razorpayKey,
-      amount: amountInPaise,
-      currency: "INR",
-      name: PAYMENT_CONFIG.merchantName,
-      description: form.productName,
-      prefill: {
-        name: form.customerName,
-        email: form.email,
-        contact: form.phone,
-      },
-      theme: { color: "#0E5A7A" },
-      modal: {
-        ondismiss: () => {
-          setPaymentError(
-            "Payment was cancelled. Please try again to complete your order.",
-          );
-          setProcessingMethod(null);
-        },
-      },
-      handler: (response: Record<string, unknown>) => {
-        const paymentResponse = response as Partial<{
-          razorpay_payment_id: string;
-          razorpay_order_id: string;
-        }>;
-
-        const orderId = createOrder("Razorpay", "Paid", {
-          paymentReference: paymentResponse.razorpay_payment_id,
-          razorpayPaymentId: paymentResponse.razorpay_payment_id,
-          razorpayOrderId: paymentResponse.razorpay_order_id,
-        });
-
-        setCheckoutResult({
-          orderId,
-          paymentMethod: "Razorpay",
-          paymentStatus: "Paid",
-          paymentReference: paymentResponse.razorpay_payment_id,
-        });
-        setProcessingMethod(null);
-      },
-    };
-
-    try {
-      const razorpay = new window.Razorpay(options);
-      razorpay.open();
-    } catch {
-      setPaymentError("Payment failed. Please try again.");
-      setProcessingMethod(null);
-    }
-  };
-
   const openGooglePay = () => {
     if (!validateBeforePayment()) return;
 
-    if (!googlePayReady) {
-      setPaymentError(
-        "Google Pay is not configured yet. Add your UPI ID in src/frontend/src/paymentConfig.ts to enable it.",
-      );
-      return;
-    }
-
-    setPaymentError("");
     setProcessingMethod("gpay");
 
-    const orderId = createOrder("Google Pay", "Pending");
-    const paymentLink = buildGooglePayLink({
-      amount: estimatedAmount,
-      productName: form.productName,
-      customerName: form.customerName,
-    });
-    const fallbackLink = buildUpiFallbackLink({
-      amount: estimatedAmount,
-      productName: form.productName,
-      customerName: form.customerName,
+    const paymentReference = `${PAYMENT_CONFIG.googlePay.demoReferencePrefix}-${Date.now()}`;
+    const orderId = createOrder("Google Pay", "Paid", {
+      paymentReference,
     });
 
     setCheckoutResult({
       orderId,
       paymentMethod: "Google Pay",
-      paymentStatus: "Pending",
-      paymentLink,
-      fallbackLink,
+      paymentStatus: "Paid",
+      paymentReference,
     });
     setProcessingMethod(null);
-
-    window.location.assign(paymentLink);
-    window.setTimeout(() => {
-      window.location.assign(fallbackLink);
-    }, 800);
   };
 
   const field = (
@@ -346,16 +222,6 @@ export default function PlaceOrder() {
                 </div>
               </div>
             )}
-
-            {checkoutResult.paymentMethod === "Google Pay" &&
-              googlePayReady && (
-                <div className="rounded-xl border border-gray-100 bg-gray-50 px-4 py-3">
-                  <div className="mb-1 text-xs text-gray-500">UPI ID</div>
-                  <div className="break-all font-mono text-sm text-gray-900">
-                    {PAYMENT_CONFIG.googlePay.upiId}
-                  </div>
-                </div>
-              )}
           </div>
 
           <div className="mb-6 flex flex-wrap items-center justify-center gap-3">
@@ -370,36 +236,16 @@ export default function PlaceOrder() {
             </span>
           </div>
 
-          {checkoutResult.paymentMethod === "Google Pay" &&
-            checkoutResult.paymentLink && (
-              <div className="mb-4 grid gap-3">
-                <a
-                  href={checkoutResult.paymentLink}
-                  className="block rounded-xl bg-[#0E5A7A] py-3 font-bold text-white transition-all hover:bg-[#0A4A66]"
-                >
-                  Open Google Pay Again
-                </a>
-                {checkoutResult.fallbackLink && (
-                  <a
-                    href={checkoutResult.fallbackLink}
-                    className="block rounded-xl border border-gray-200 py-3 font-semibold text-gray-700 transition-all hover:border-[#0E5A7A] hover:text-[#0E5A7A]"
-                  >
-                    Open Generic UPI App
-                  </a>
-                )}
-              </div>
-            )}
-
           <p className="mb-6 text-sm text-gray-400">
             Save this Order ID to track your order status.
           </p>
-          <a
-            href="/track"
+          <Link
+            to="/track"
             data-ocid="track_order.link"
             className="block rounded-xl bg-[#F97316] py-3 font-bold text-white transition-all hover:scale-[1.02] hover:bg-[#E8660E] hover:shadow-lg hover:shadow-orange-200"
           >
             Track Your Order
-          </a>
+          </Link>
         </div>
       </div>
     );
@@ -412,38 +258,11 @@ export default function PlaceOrder() {
         <div className="mt-3 h-1 w-16 rounded bg-[#F97316]" />
       </div>
 
-      {paymentError && (
-        <div
-          data-ocid="payment.error_state"
-          className="error-shake mb-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700"
-        >
-          <AlertCircle size={20} className="mt-0.5 shrink-0" />
-          <div className="flex-1">
-            <p className="text-sm font-semibold">
-              Payment could not be started
-            </p>
-            <p className="mt-0.5 text-xs text-red-600">{paymentError}</p>
-          </div>
-          <button
-            type="button"
-            data-ocid="payment.retry_button"
-            onClick={openRazorpay}
-            disabled={processingMethod !== null}
-            className="shrink-0 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-bold text-white transition-all hover:scale-105 hover:bg-red-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            <span className="flex items-center gap-1.5">
-              <RefreshCw size={12} />
-              Retry
-            </span>
-          </button>
-        </div>
-      )}
-
       <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm md:p-8">
         <form
           onSubmit={(event) => {
             event.preventDefault();
-            void openRazorpay();
+            openGooglePay();
           }}
           className="space-y-5"
         >
@@ -637,72 +456,39 @@ export default function PlaceOrder() {
 
             <div className="grid gap-2 rounded-xl border border-gray-100 bg-white px-4 py-3 text-sm text-gray-600">
               <p>
-                Razorpay gives instant payment confirmation and marks the order
-                as paid automatically.
+                Razorpay checkout abhi {PAYMENT_CONFIG.razorpay.statusLabel.toLowerCase()} hai.
               </p>
               <p>
-                Google Pay opens a UPI payment link. That order stays pending
-                until you confirm the payment manually.
+                Google Pay demo mode active hai. Click karte hi paid order ban
+                jayega aur tracking turant start ho jayegi.
               </p>
               <p>
-                {googlePayReady
-                  ? `Google Pay UPI ID: ${PAYMENT_CONFIG.googlePay.upiId}`
-                  : "Google Pay setup pending. Add your real UPI ID in src/frontend/src/paymentConfig.ts."}
+                Har successful demo order Google Sheet me save hoga aur Track
+                Order page par mil jayega.
               </p>
             </div>
 
-            <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
-              <p className="text-xs font-medium text-amber-700">
-                Test Mode: Razorpay is still using a test key, so live payments
-                should not be trusted until the production key is added.
+            <div className="rounded-lg border border-[#0E5A7A]/15 bg-white px-3 py-2">
+              <p className="text-xs font-medium text-[#0E5A7A]">
+                Tracking system live hai. Abhi Google Pay demo checkout active
+                hai aur Razorpay soon aayega.
               </p>
             </div>
           </div>
 
           <div className="grid gap-3 md:grid-cols-2">
             <button
-              type="submit"
+              type="button"
               data-ocid="order.submit_button"
-              disabled={processingMethod !== null}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#F97316] py-4 text-lg font-bold text-white transition-all hover:scale-[1.01] hover:bg-[#E8660E] hover:shadow-lg hover:shadow-orange-200 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+              disabled
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-gray-100 py-4 text-lg font-bold text-gray-500 opacity-90"
             >
-              {processingMethod === "razorpay" ? (
-                <>
-                  <svg
-                    role="img"
-                    aria-label="Loading"
-                    className="h-5 w-5 animate-spin"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8v8z"
-                    />
-                  </svg>
-                  Opening Razorpay...
-                </>
-              ) : (
-                <>
-                  <Lock size={18} />
-                  Pay with Razorpay
-                </>
-              )}
+              <Lock size={18} />
+              Razorpay - {PAYMENT_CONFIG.razorpay.statusLabel}
             </button>
 
             <button
-              type="button"
-              onClick={openGooglePay}
+              type="submit"
               disabled={processingMethod !== null}
               className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#0E5A7A] bg-white py-4 text-lg font-bold text-[#0E5A7A] transition-all hover:scale-[1.01] hover:bg-[#0E5A7A] hover:text-white active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
             >
@@ -730,7 +516,7 @@ export default function PlaceOrder() {
                       d="M4 12a8 8 0 018-8v8z"
                     />
                   </svg>
-                  Opening Google Pay...
+                  Confirming Google Pay...
                 </>
               ) : (
                 <>

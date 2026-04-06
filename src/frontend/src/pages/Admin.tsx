@@ -1,4 +1,4 @@
-import { Check, LogOut, Pencil, Plus, Trash2, X } from "lucide-react";
+import { Check, LogOut, Pencil, Plus, RefreshCw, Trash2, X } from "lucide-react";
 import { useState } from "react";
 import { useApp } from "../context/AppContext";
 import type { Order, Product } from "../context/AppContext";
@@ -24,6 +24,7 @@ export default function Admin() {
     deleteProduct,
     updateOrderStatus,
     updateOrderPayment,
+    syncOrdersFromSheet,
   } = useApp();
   const [isLoggedIn, setIsLoggedIn] = useState(
     () => sessionStorage.getItem("megabags_admin") === "1",
@@ -33,6 +34,8 @@ export default function Admin() {
   const [tab, setTab] = useState<"products" | "orders">("products");
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [isSyncingOrders, setIsSyncingOrders] = useState(false);
+  const [syncMessage, setSyncMessage] = useState("");
   const [pForm, setPForm] = useState({
     name: "",
     imageUrl: "",
@@ -50,6 +53,8 @@ export default function Admin() {
     ) {
       sessionStorage.setItem("megabags_admin", "1");
       setIsLoggedIn(true);
+      setTab("orders");
+      void handleRemoteSync();
       return;
     }
     setLoginError("Invalid username or password");
@@ -131,6 +136,28 @@ export default function Admin() {
     return status === "Paid"
       ? "bg-green-100 text-green-700"
       : "bg-amber-100 text-amber-800";
+  };
+
+  const handleRemoteSync = async () => {
+    setIsSyncingOrders(true);
+    setSyncMessage("");
+
+    try {
+      const syncedOrders = await syncOrdersFromSheet();
+      setSyncMessage(
+        syncedOrders > 0
+          ? `${syncedOrders} order Google Sheet se sync ho gaye.`
+          : "Google Sheet connected hai, lekin abhi koi order record nahi mila.",
+      );
+    } catch (error) {
+      setSyncMessage(
+        error instanceof Error
+          ? error.message
+          : "Google Sheet sync complete nahi ho paya.",
+      );
+    } finally {
+      setIsSyncingOrders(false);
+    }
   };
 
   if (!isLoggedIn)
@@ -226,7 +253,12 @@ export default function Admin() {
             <button
               type="button"
               key={currentTab}
-              onClick={() => setTab(currentTab)}
+              onClick={() => {
+                setTab(currentTab);
+                if (currentTab === "orders") {
+                  void handleRemoteSync();
+                }
+              }}
               className={`rounded-lg px-6 py-2.5 font-semibold capitalize transition-colors ${
                 tab === currentTab
                   ? "bg-[#0E5A7A] text-white"
@@ -388,9 +420,34 @@ export default function Admin() {
 
         {tab === "orders" && (
           <div>
-            <h2 className="mb-4 text-xl font-black text-gray-900">
-              Order Management ({orders.length} orders)
-            </h2>
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="text-xl font-black text-gray-900">
+                  Order Management ({orders.length} orders)
+                </h2>
+                <p className="text-sm text-gray-500">
+                  Google Sheet sync se naye online orders aur tracking updates
+                  yahan aayenge.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => void handleRemoteSync()}
+                disabled={isSyncingOrders}
+                className="inline-flex items-center gap-2 rounded-lg border border-[#0E5A7A] px-4 py-2 text-sm font-semibold text-[#0E5A7A] transition-colors hover:bg-[#0E5A7A] hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <RefreshCw
+                  size={16}
+                  className={isSyncingOrders ? "animate-spin" : ""}
+                />
+                {isSyncingOrders ? "Syncing..." : "Refresh from Sheet"}
+              </button>
+            </div>
+            {syncMessage && (
+              <div className="mb-4 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-600">
+                {syncMessage}
+              </div>
+            )}
             {orders.length === 0 ? (
               <div className="py-16 text-center text-gray-400">
                 <p>No orders yet</p>

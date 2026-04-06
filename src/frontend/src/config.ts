@@ -16,6 +16,8 @@ interface JsonConfig {
   backend_canister_id: string;
   project_id: string;
   ii_derivation_origin: string;
+  google_sheets_webhook_url?: string;
+  google_sheets_admin_key?: string;
 }
 
 interface Config {
@@ -25,6 +27,8 @@ interface Config {
   bucket_name: string;
   project_id: string;
   ii_derivation_origin?: string;
+  google_sheets_webhook_url?: string;
+  google_sheets_admin_key?: string;
 }
 
 let configCache: Config | null = null;
@@ -60,6 +64,14 @@ export async function loadConfig(): Promise<Config> {
         config.ii_derivation_origin === "undefined"
           ? undefined
           : config.ii_derivation_origin,
+      google_sheets_webhook_url:
+        config.google_sheets_webhook_url === "undefined"
+          ? undefined
+          : config.google_sheets_webhook_url,
+      google_sheets_admin_key:
+        config.google_sheets_admin_key === "undefined"
+          ? undefined
+          : config.google_sheets_admin_key,
     };
     configCache = fullConfig;
     return fullConfig;
@@ -75,6 +87,8 @@ export async function loadConfig(): Promise<Config> {
       bucket_name: DEFAULT_BUCKET_NAME,
       project_id: DEFAULT_PROJECT_ID,
       ii_derivation_origin: undefined,
+      google_sheets_webhook_url: undefined,
+      google_sheets_admin_key: undefined,
     };
     return fallbackConfig;
   }

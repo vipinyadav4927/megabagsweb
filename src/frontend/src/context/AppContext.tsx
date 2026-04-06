@@ -5,6 +5,11 @@ import {
   useEffect,
   useState,
 } from "react";
+import {
+  fetchAllOrdersFromGoogleSheets,
+  saveOrderToGoogleSheets,
+  updateOrderInGoogleSheets,
+} from "../services/googleSheets";
 
 export interface Product {
   id: string;
@@ -144,9 +149,27 @@ interface AppContextType {
     paymentReference?: string,
   ) => void;
   getOrder: (orderId: string) => Order | undefined;
+  syncOrdersFromSheet: () => Promise<number>;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
+
+function mergeOrders(currentOrders: Order[], incomingOrders: Order[]) {
+  const merged = new Map<string, Order>();
+
+  currentOrders.forEach((order) => {
+    merged.set(order.orderId, order);
+  });
+
+  incomingOrders.forEach((order) => {
+    merged.set(order.orderId, order);
+  });
+
+  return Array.from(merged.values()).sort((a, b) => {
+    if (a.createdAt === b.createdAt) return 0;
+    return a.createdAt < b.createdAt ? -1 : 1;
+  });
+}
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [products, setProducts] = useState<Product[]>(() => {
@@ -223,23 +246,27 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const generateOrderId = (existingOrders: Order[]) => {
     let orderId = "";
     do {
-      orderId = `MB${Math.floor(10000 + Math.random() * 90000)}`;
+      orderId = `MB${Date.now().toString().slice(-6)}${Math.floor(
+        10 + Math.random() * 90,
+      )}`;
     } while (existingOrders.some((order) => order.orderId === orderId));
     return orderId;
   };
 
   const addOrder = (o: Omit<Order, "orderId" | "status" | "createdAt">) => {
-    let orderId = "";
-    setOrders((prev) => {
-      orderId = generateOrderId(prev);
-      const newOrder: Order = {
-        ...o,
-        orderId,
-        status: "Order Placed",
-        createdAt: new Date().toISOString(),
-      };
-      return [...prev, newOrder];
+    const orderId = generateOrderId(orders);
+    const newOrder: Order = {
+      ...o,
+      orderId,
+      status: "Order Placed",
+      createdAt: new Date().toISOString(),
+    };
+
+    setOrders((prev) => [...prev, newOrder]);
+    void saveOrderToGoogleSheets(newOrder).catch((error) => {
+      console.warn("Order Google Sheets me save nahi ho paya.", error);
     });
+
     return orderId;
   };
 
@@ -247,6 +274,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setOrders((prev) =>
       prev.map((o) => (o.orderId === orderId ? { ...o, status } : o)),
     );
+
+    void updateOrderInGoogleSheets(orderId, {
+      status,
+    }).catch((error) => {
+      console.warn("Order status Google Sheets me update nahi ho paya.", error);
+    });
   };
 
   const updateOrderPayment = (
@@ -268,10 +301,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
           : order,
       ),
     );
+
+    void updateOrderInGoogleSheets(orderId, {
+      paymentStatus,
+      paymentReference,
+    }).catch((error) => {
+      console.warn("Order payment Google Sheets me update nahi ho paya.", error);
+    });
   };
 
   const getOrder = (orderId: string) =>
     orders.find((o) => o.orderId === orderId);
+
+  const syncOrdersFromSheet = async () => {
+    const remoteOrders = await fetchAllOrdersFromGoogleSheets();
+    setOrders((prev) => mergeOrders(prev, remoteOrders));
+    return remoteOrders.length;
+  };
 
   return (
     <AppContext.Provider
@@ -285,6 +331,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         updateOrderStatus,
         updateOrderPayment,
         getOrder,
+        syncOrdersFromSheet,
       }}
     >
       {children}

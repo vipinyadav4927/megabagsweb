@@ -1,6 +1,7 @@
-import { CheckCircle, Circle } from "lucide-react";
+import { CheckCircle, Circle, LoaderCircle } from "lucide-react";
 import { useState } from "react";
 import { useApp } from "../context/AppContext";
+import { findOrderInGoogleSheets } from "../services/googleSheets";
 
 const STATUSES = [
   "Order Placed",
@@ -15,11 +16,19 @@ export default function TrackOrder() {
   const [result, setResult] = useState<
     ReturnType<typeof getOrder> | "not-found" | null
   >(null);
+  const [isSearching, setIsSearching] = useState(false);
 
-  const handleSearch = () => {
-    if (!orderId.trim()) return;
-    const order = getOrder(orderId.trim().toUpperCase());
-    setResult(order || "not-found");
+  const handleSearch = async () => {
+    const normalizedOrderId = orderId.trim().toUpperCase();
+    if (!normalizedOrderId) return;
+
+    setIsSearching(true);
+
+    const localOrder = getOrder(normalizedOrderId);
+    const remoteOrder = await findOrderInGoogleSheets(normalizedOrderId);
+
+    setResult(remoteOrder || localOrder || "not-found");
+    setIsSearching(false);
   };
 
   const statusIndex =
@@ -41,16 +50,28 @@ export default function TrackOrder() {
             type="text"
             value={orderId}
             onChange={(event) => setOrderId(event.target.value.toUpperCase())}
-            onKeyDown={(event) => event.key === "Enter" && handleSearch()}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                void handleSearch();
+              }
+            }}
             placeholder="e.g. MB12345"
             className="flex-1 rounded-xl border border-gray-200 px-4 py-3 text-lg font-mono uppercase focus:outline-none focus:ring-2 focus:ring-[#0E5A7A]/30"
           />
           <button
             type="button"
-            onClick={handleSearch}
-            className="rounded-xl bg-[#F97316] px-6 py-3 font-bold text-white transition-colors hover:bg-[#E8660E]"
+            onClick={() => void handleSearch()}
+            disabled={isSearching}
+            className="rounded-xl bg-[#F97316] px-6 py-3 font-bold text-white transition-colors hover:bg-[#E8660E] disabled:cursor-not-allowed disabled:opacity-70"
           >
-            Track
+            {isSearching ? (
+              <span className="flex items-center gap-2">
+                <LoaderCircle size={18} className="animate-spin" />
+                Tracking...
+              </span>
+            ) : (
+              "Track"
+            )}
           </button>
         </div>
       </div>
@@ -182,9 +203,8 @@ export default function TrackOrder() {
           {result.paymentMethod === "Google Pay" &&
             result.paymentStatus === "Pending" && (
               <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-                Google Pay orders stay pending until the payment is confirmed
-                manually. Share the UTR or screenshot after payment so the order
-                can be marked as paid.
+                Yeh older Google Pay order pending hai. Naye demo Google Pay
+                orders payment ke saath hi paid dikhte hain.
               </div>
             )}
 

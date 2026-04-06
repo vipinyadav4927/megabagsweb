@@ -13,7 +13,9 @@ build:
             "backend_host": "http://localhost:8081",
             "backend_canister_id": "$BACKEND_CANISTER_ID",
             "project_id": "undefined",
-            "ii_derivation_origin": "undefined"
+            "ii_derivation_origin": "undefined",
+            "google_sheets_webhook_url": "https://script.google.com/macros/s/AKfycbxvg3Kz4UTYgluG_tgXIIuLonhZqJ6_iOEo0RFXWotd13bzG5NVmBLkialpqL3qZZYgpQ/exec",
+            "google_sheets_admin_key": "MegaBags_2026"
           }
           EOF
         - pnpm --filter '@vipin yadav/template-frontend' build:skip-bindings

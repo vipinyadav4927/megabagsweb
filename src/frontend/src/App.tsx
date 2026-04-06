@@ -1,4 +1,11 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { useEffect } from "react";
+import {
+  BrowserRouter,
+  HashRouter,
+  Route,
+  Routes,
+  useLocation,
+} from "react-router-dom";
 import Layout from "./components/Layout";
 import { AppProvider } from "./context/AppContext";
 import About from "./pages/About";
@@ -10,11 +17,26 @@ import PlaceOrder from "./pages/PlaceOrder";
 import ProductDetails from "./pages/ProductDetails";
 import Products from "./pages/Products";
 import TrackOrder from "./pages/TrackOrder";
+import { logWebsiteVisit } from "./services/googleSheets";
+
+function RouteTracker() {
+  const location = useLocation();
+
+  useEffect(() => {
+    const fullPath = `${location.pathname}${location.search}`;
+    void logWebsiteVisit(fullPath);
+  }, [location.pathname, location.search]);
+
+  return null;
+}
 
 export default function App() {
+  const Router = import.meta.env.PROD ? HashRouter : BrowserRouter;
+
   return (
     <AppProvider>
-      <BrowserRouter>
+      <Router>
+        <RouteTracker />
         <Routes>
           <Route path="/admin123" element={<Admin />} />
           <Route element={<Layout />}>
@@ -28,7 +50,7 @@ export default function App() {
             <Route path="/call" element={<CallUs />} />
           </Route>
         </Routes>
-      </BrowserRouter>
+      </Router>
     </AppProvider>
   );
 }

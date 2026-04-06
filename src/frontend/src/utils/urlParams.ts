@@ -21,11 +21,17 @@ export function getUrlParameter(paramName: string): string | null {
 
   // If not found, try to extract from hash (for hash-based routing)
   const hash = window.location.hash;
-  const queryStartIndex = hash.indexOf("?");
+  const hashContent = hash.substring(1);
+  const queryStartIndex = hashContent.indexOf("?");
 
   if (queryStartIndex !== -1) {
-    const hashQuery = hash.substring(queryStartIndex + 1);
+    const hashQuery = hashContent.substring(queryStartIndex + 1);
     const hashParams = new URLSearchParams(hashQuery);
+    return hashParams.get(paramName);
+  }
+
+  if (hashContent && !hashContent.startsWith("/")) {
+    const hashParams = new URLSearchParams(hashContent);
     return hashParams.get(paramName);
   }
 
@@ -125,17 +131,24 @@ function clearParamFromHash(paramName: string): void {
 
   // Remove the leading #
   const hashContent = hash.substring(1);
+  const hasRoutePath = hashContent.startsWith("/");
 
   // Split route path from query string
   const queryStartIndex = hashContent.indexOf("?");
 
-  if (queryStartIndex === -1) {
+  if (queryStartIndex === -1 && hasRoutePath) {
     // No query string in hash, nothing to remove
     return;
   }
 
-  const routePath = hashContent.substring(0, queryStartIndex);
-  const queryString = hashContent.substring(queryStartIndex + 1);
+  const routePath =
+    queryStartIndex === -1 || !hasRoutePath
+      ? ""
+      : hashContent.substring(0, queryStartIndex);
+  const queryString =
+    queryStartIndex === -1
+      ? hashContent
+      : hashContent.substring(queryStartIndex + 1);
 
   // Parse and remove the specific parameter
   const params = new URLSearchParams(queryString);
@@ -174,16 +187,7 @@ export function getSecretFromHash(paramName: string): string | null {
     return existingSecret;
   }
 
-  // Try to extract from hash
-  const hash = window.location.hash;
-  if (!hash || hash.length <= 1) {
-    return null;
-  }
-
-  // Remove the leading #
-  const hashContent = hash.substring(1);
-  const params = new URLSearchParams(hashContent);
-  const secret = params.get(paramName);
+  const secret = getUrlParameter(paramName);
 
   if (secret) {
     // Store in session for persistence
