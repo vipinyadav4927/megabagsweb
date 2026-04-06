@@ -2,9 +2,9 @@ type BrandLogoVariant = "hero" | "nav" | "mobile" | "footer";
 
 const variantClasses: Record<BrandLogoVariant, string> = {
   hero: "h-[108px] w-full max-w-[520px] md:h-[132px]",
-  nav: "h-[52px] w-[236px]",
-  mobile: "h-[40px] w-[176px]",
-  footer: "h-[58px] w-[248px]",
+  nav: "h-[60px] w-[290px]",
+  mobile: "h-[44px] w-[212px]",
+  footer: "h-[68px] w-[320px]",
 };
 
 interface BrandLogoProps {
@@ -21,7 +21,7 @@ export default function BrandLogo({
       className={`inline-flex shrink-0 items-center ${variantClasses[variant]} ${className}`}
     >
       <img
-        src="/megabags-logo.webp"
+        src="/megabags-logo-cropped.webp"
         alt="Mega Bags logo"
         className="block max-h-full w-auto max-w-full object-contain object-left"
         decoding="async"

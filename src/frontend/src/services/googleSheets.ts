@@ -149,41 +149,48 @@ function submitWebhookForm(webhookUrl: string, payload: object) {
   });
 }
 
-function sendVisitBeacon(webhookUrl: string, visit: Record<string, string>) {
-  return new Promise<boolean>((resolve) => {
-    const image = new Image();
-    let settled = false;
-
-    const finish = (ok: boolean) => {
-      if (settled) {
-        return;
-      }
-
-      settled = true;
-      window.clearTimeout(timeoutId);
-      image.onload = null;
-      image.onerror = null;
-      resolve(ok);
-    };
-
-    const timeoutId = window.setTimeout(() => {
-      finish(true);
-    }, 4_000);
-
-    image.onload = () => finish(true);
-    image.onerror = () => finish(false);
-    image.src = buildUrl(webhookUrl, {
-      action: "logVisit",
-      ...visit,
-      _: Date.now().toString(),
+async function postJsonNoCors(webhookUrl: string, payload: object) {
+  try {
+    await fetch(webhookUrl, {
+      method: "POST",
+      mode: "no-cors",
+      keepalive: true,
+      headers: {
+        "Content-Type": "text/plain;charset=UTF-8",
+      },
+      body: JSON.stringify(payload),
     });
-  });
+
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function postWithBeacon(webhookUrl: string, payload: object) {
+  try {
+    const body = JSON.stringify(payload);
+    const blob = new Blob([body], {
+      type: "text/plain;charset=UTF-8",
+    });
+    return navigator.sendBeacon?.(webhookUrl, blob) ?? false;
+  } catch {
+    return false;
+  }
 }
 
 async function postWebhook(payload: object) {
   const config = await getSheetsConfig();
   if (!config) {
     return false;
+  }
+
+  if (await postJsonNoCors(config.webhookUrl, payload)) {
+    return true;
+  }
+
+  if (postWithBeacon(config.webhookUrl, payload)) {
+    return true;
   }
 
   try {
@@ -267,24 +274,22 @@ function normalizeOrder(remoteOrder: RemoteOrder | null | undefined): Order | nu
 }
 
 export async function logWebsiteVisit(pagePath: string) {
-  const config = await getSheetsConfig();
-  if (!config) {
-    return false;
-  }
-
   const { visitorId, sessionId } = getTrackingIds();
-  return sendVisitBeacon(config.webhookUrl, {
-    visitorId,
-    sessionId,
-    visitorEmail: getStoredVisitorEmail(),
-    pagePath,
-    pageTitle: document.title || "Mega Bags",
-    pageUrl: window.location.href,
-    referrer: document.referrer || "",
-    language: navigator.language || "",
-    screenSize: `${window.screen.width}x${window.screen.height}`,
-    userAgent: navigator.userAgent,
-    visitedAt: new Date().toISOString(),
+  return postWebhook({
+    action: "logVisit",
+    visit: {
+      visitorId,
+      sessionId,
+      visitorEmail: getStoredVisitorEmail(),
+      pagePath,
+      pageTitle: document.title || "Mega Bags",
+      pageUrl: window.location.href,
+      referrer: document.referrer || "",
+      language: navigator.language || "",
+      screenSize: `${window.screen.width}x${window.screen.height}`,
+      userAgent: navigator.userAgent,
+      visitedAt: new Date().toISOString(),
+    },
   });
 }
 
