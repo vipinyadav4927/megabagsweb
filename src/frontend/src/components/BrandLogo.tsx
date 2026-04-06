@@ -2,9 +2,9 @@ type BrandLogoVariant = "hero" | "nav" | "mobile" | "footer";
 
 const variantClasses: Record<BrandLogoVariant, string> = {
   hero: "h-[108px] w-full max-w-[520px] md:h-[132px]",
-  nav: "h-[60px] w-[290px]",
-  mobile: "h-[44px] w-[212px]",
-  footer: "h-[68px] w-[320px]",
+  nav: "h-[56px] w-[264px] lg:h-[66px] lg:w-[316px]",
+  mobile: "h-[48px] w-[230px]",
+  footer: "h-[64px] w-[288px] md:h-[72px] md:w-[332px]",
 };
 
 interface BrandLogoProps {

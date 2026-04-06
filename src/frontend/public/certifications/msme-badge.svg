@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 160" role="img" aria-labelledby="msmeTitle msmeDesc">
+  <title id="msmeTitle">MSME registered badge</title>
+  <desc id="msmeDesc">Stylized MSME registration badge.</desc>
+  <rect width="280" height="160" rx="24" fill="#FFFDF8"/>
+  <rect x="8" y="8" width="264" height="144" rx="18" fill="#FFFFFF" stroke="#E9E3D7"/>
+  <circle cx="68" cy="80" r="30" fill="#FFEDD5"/>
+  <path d="M52 95 68 54 84 95" fill="none" stroke="#F97316" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M58 82h20" stroke="#16A34A" stroke-width="6" stroke-linecap="round"/>
+  <text x="112" y="70" fill="#334155" font-size="28" font-weight="800" font-family="Arial, sans-serif">MSME</text>
+  <text x="112" y="96" fill="#667788" font-size="14" font-weight="700" font-family="Arial, sans-serif" letter-spacing="1.5">REGISTERED</text>
+  <text x="38" y="128" fill="#8B98A1" font-size="12" font-weight="700" font-family="Arial, sans-serif" letter-spacing="1.5">RECOGNIZED MANUFACTURING ENTERPRISE</text>
+</svg>

@@ -79,10 +79,19 @@
   }
   body {
     @apply bg-background text-foreground;
+    background:
+      radial-gradient(circle at top left, rgba(47, 157, 199, 0.08), transparent 28%),
+      radial-gradient(circle at bottom right, rgba(249, 115, 22, 0.08), transparent 26%),
+      linear-gradient(180deg, #f8fbfd 0%, #f3f6f8 100%);
   }
 
   html {
     scroll-behavior: smooth;
+  }
+
+  ::selection {
+    background: rgba(14, 90, 122, 0.18);
+    color: #0b2132;
   }
 }
 
