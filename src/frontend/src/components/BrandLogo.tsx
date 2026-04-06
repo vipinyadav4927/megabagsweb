@@ -17,12 +17,16 @@ export default function BrandLogo({
   className = "",
 }: BrandLogoProps) {
   return (
-    <img
-      src="/megabags-logo.webp"
-      alt="Mega Bags logo"
-      className={`h-full w-full object-contain object-left ${variantClasses[variant]} ${className}`}
-      decoding="async"
-      loading={variant === "hero" ? "eager" : "lazy"}
-    />
+    <span
+      className={`inline-flex shrink-0 items-center ${variantClasses[variant]} ${className}`}
+    >
+      <img
+        src="/megabags-logo.webp"
+        alt="Mega Bags logo"
+        className="block max-h-full w-auto max-w-full object-contain object-left"
+        decoding="async"
+        loading={variant === "hero" ? "eager" : "lazy"}
+      />
+    </span>
   );
 }

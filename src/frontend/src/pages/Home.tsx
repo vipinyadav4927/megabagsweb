@@ -9,7 +9,6 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import BrandLogo from "../components/BrandLogo";
 import { useApp } from "../context/AppContext";
 
 export default function Home() {
@@ -46,7 +45,6 @@ export default function Home() {
             <div className="mb-4 inline-block rounded-full bg-[#F97316] px-3 py-1 text-xs font-bold uppercase tracking-wider text-white">
               India's Trusted Manufacturer
             </div>
-            <BrandLogo variant="hero" className="mb-6" />
             <h1 className="mb-4 text-4xl font-black uppercase leading-tight text-white md:text-5xl">
               Bulk Packaging
               <br />
