@@ -203,8 +203,8 @@ export default function TrackOrder() {
           {result.paymentMethod === "Google Pay" &&
             result.paymentStatus === "Pending" && (
               <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-                Yeh older Google Pay order pending hai. Naye demo Google Pay
-                orders payment ke saath hi paid dikhte hain.
+                This is an older Google Pay order that is still marked as
+                pending.
               </div>
             )}
 

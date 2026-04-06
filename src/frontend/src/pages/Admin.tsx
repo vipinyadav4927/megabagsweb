@@ -146,14 +146,14 @@ export default function Admin() {
       const syncedOrders = await syncOrdersFromSheet();
       setSyncMessage(
         syncedOrders > 0
-          ? `${syncedOrders} order Google Sheet se sync ho gaye.`
-          : "Google Sheet connected hai, lekin abhi koi order record nahi mila.",
+          ? `${syncedOrders} orders were synced from Google Sheets.`
+          : "Google Sheets is connected, but no order records were found yet.",
       );
     } catch (error) {
       setSyncMessage(
         error instanceof Error
           ? error.message
-          : "Google Sheet sync complete nahi ho paya.",
+          : "Google Sheets sync could not be completed.",
       );
     } finally {
       setIsSyncingOrders(false);
@@ -426,8 +426,8 @@ export default function Admin() {
                   Order Management ({orders.length} orders)
                 </h2>
                 <p className="text-sm text-gray-500">
-                  Google Sheet sync se naye online orders aur tracking updates
-                  yahan aayenge.
+                  New online orders and tracking updates can be synced from
+                  Google Sheets here.
                 </p>
               </div>
               <button

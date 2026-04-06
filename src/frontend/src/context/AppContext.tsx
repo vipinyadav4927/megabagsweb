@@ -264,7 +264,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     setOrders((prev) => [...prev, newOrder]);
     void saveOrderToGoogleSheets(newOrder).catch((error) => {
-      console.warn("Order Google Sheets me save nahi ho paya.", error);
+      console.warn("Order could not be saved to Google Sheets.", error);
     });
 
     return orderId;
@@ -278,7 +278,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     void updateOrderInGoogleSheets(orderId, {
       status,
     }).catch((error) => {
-      console.warn("Order status Google Sheets me update nahi ho paya.", error);
+      console.warn("Order status could not be updated in Google Sheets.", error);
     });
   };
 
@@ -306,7 +306,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       paymentStatus,
       paymentReference,
     }).catch((error) => {
-      console.warn("Order payment Google Sheets me update nahi ho paya.", error);
+      console.warn("Order payment could not be updated in Google Sheets.", error);
     });
   };
 

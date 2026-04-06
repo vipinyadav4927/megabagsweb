@@ -33,6 +33,7 @@ export default function PlaceOrder() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [processingMethod, setProcessingMethod] = useState<"gpay" | null>(null);
+  const [paymentNotice, setPaymentNotice] = useState("");
   const [checkoutResult, setCheckoutResult] = useState<CheckoutResult | null>(
     null,
   );
@@ -87,6 +88,7 @@ export default function PlaceOrder() {
   const openGooglePay = () => {
     if (!validateBeforePayment()) return;
 
+    setPaymentNotice("");
     setProcessingMethod("gpay");
 
     const paymentReference = `${PAYMENT_CONFIG.googlePay.demoReferencePrefix}-${Date.now()}`;
@@ -101,6 +103,10 @@ export default function PlaceOrder() {
       paymentReference,
     });
     setProcessingMethod(null);
+  };
+
+  const showUpcomingNotice = (label: string) => {
+    setPaymentNotice(`${label} checkout is coming soon.`);
   };
 
   const field = (
@@ -435,13 +441,15 @@ export default function PlaceOrder() {
                   label: "Wallets",
                 },
               ].map(({ icon, label }) => (
-                <span
+                <button
+                  type="button"
                   key={label}
+                  onClick={() => showUpcomingNotice(label)}
                   className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-600 shadow-sm transition-all hover:border-[#0E5A7A]/30 hover:shadow-md"
                 >
                   {icon}
                   {label}
-                </span>
+                </button>
               ))}
             </div>
 
@@ -453,35 +461,21 @@ export default function PlaceOrder() {
                   : "--"}
               </span>
             </div>
-
-            <div className="grid gap-2 rounded-xl border border-gray-100 bg-white px-4 py-3 text-sm text-gray-600">
-              <p>
-                Razorpay checkout abhi {PAYMENT_CONFIG.razorpay.statusLabel.toLowerCase()} hai.
-              </p>
-              <p>
-                Google Pay demo mode active hai. Click karte hi paid order ban
-                jayega aur tracking turant start ho jayegi.
-              </p>
-              <p>
-                Har successful demo order Google Sheet me save hoga aur Track
-                Order page par mil jayega.
-              </p>
-            </div>
-
-            <div className="rounded-lg border border-[#0E5A7A]/15 bg-white px-3 py-2">
-              <p className="text-xs font-medium text-[#0E5A7A]">
-                Tracking system live hai. Abhi Google Pay demo checkout active
-                hai aur Razorpay soon aayega.
-              </p>
-            </div>
+            {paymentNotice && (
+              <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
+                <p className="text-xs font-medium text-amber-700">
+                  {paymentNotice}
+                </p>
+              </div>
+            )}
           </div>
 
           <div className="grid gap-3 md:grid-cols-2">
             <button
               type="button"
               data-ocid="order.submit_button"
-              disabled
-              className="flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-gray-100 py-4 text-lg font-bold text-gray-500 opacity-90"
+              onClick={() => showUpcomingNotice("Razorpay")}
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-gray-100 py-4 text-lg font-bold text-gray-500 opacity-90 transition-colors hover:border-[#0E5A7A]/30 hover:text-[#0E5A7A]"
             >
               <Lock size={18} />
               Razorpay - {PAYMENT_CONFIG.razorpay.statusLabel}

@@ -40,7 +40,7 @@ async function getSheetsConfig(options?: { requireAdminKey?: boolean }) {
 
   if (options?.requireAdminKey && !adminKey) {
     throw new Error(
-      "Google Sheets admin key missing hai. env.json me google_sheets_admin_key set kijiye.",
+      "Google Sheets admin key is missing. Set google_sheets_admin_key in env.json.",
     );
   }
 
@@ -131,7 +131,7 @@ async function postWebhook(payload: object) {
 async function jsonpRequest<T>(params: Record<string, string>) {
   const config = await getSheetsConfig();
   if (!config) {
-    throw new Error("Google Sheets webhook abhi configure nahi hua hai.");
+    throw new Error("Google Sheets webhook is not configured yet.");
   }
 
   return new Promise<JsonpResponse<T>>((resolve, reject) => {
@@ -149,7 +149,7 @@ async function jsonpRequest<T>(params: Record<string, string>) {
 
     const timeoutId = window.setTimeout(() => {
       cleanup();
-      reject(new Error("Google Sheets se response aane me zyada time lag gaya."));
+      reject(new Error("Google Sheets took too long to respond."));
     }, 15_000);
 
     globalWindow[callbackName] = (payload: JsonpResponse<T>) => {
@@ -164,7 +164,7 @@ async function jsonpRequest<T>(params: Record<string, string>) {
     });
     script.onerror = () => {
       cleanup();
-      reject(new Error("Google Sheets connection load nahi ho paya."));
+      reject(new Error("Google Sheets connection could not be loaded."));
     };
 
     document.body.appendChild(script);
@@ -242,7 +242,7 @@ export async function updateOrderInGoogleSheets(
 ) {
   const config = await getSheetsConfig({ requireAdminKey: true });
   if (!config) {
-    throw new Error("Google Sheets webhook abhi configure nahi hua hai.");
+    throw new Error("Google Sheets webhook is not configured yet.");
   }
 
   return postWebhook({
@@ -282,7 +282,7 @@ export async function findOrderInGoogleSheets(orderId: string) {
 export async function fetchAllOrdersFromGoogleSheets() {
   const config = await getSheetsConfig({ requireAdminKey: true });
   if (!config) {
-    throw new Error("Google Sheets webhook abhi configure nahi hua hai.");
+    throw new Error("Google Sheets webhook is not configured yet.");
   }
 
   const response = await jsonpRequest<{ orders?: RemoteOrder[] }>({
@@ -291,7 +291,7 @@ export async function fetchAllOrdersFromGoogleSheets() {
   });
 
   if (!response.ok) {
-    throw new Error(response.error || "Orders fetch nahi ho paaye.");
+    throw new Error(response.error || "Orders could not be fetched.");
   }
 
   return (response.orders ?? [])

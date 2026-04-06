@@ -8,50 +8,50 @@ interface Message {
 }
 
 const QUICK_REPLIES = [
-  "Products dekhen",
-  "Order kaise karein",
-  "Price poochein",
-  "Order Track karein",
+  "View products",
+  "How to order",
+  "Ask pricing",
+  "Track order",
 ];
 
 function getBotResponse(input: string): string {
   const msg = input.toLowerCase().trim();
   if (/\b(hi|hello|namaste|hii|hey|namaskar)\b/.test(msg)) {
-    return "Namaste! Main Mega Bags ka assistant hoon. Aap products, orders, ya pricing ke baare mein pooch sakte hain. \uD83D\uDE4F";
+    return "Hello! I am the Mega Bags assistant. You can ask about products, orders, pricing, or delivery.";
   }
   if (
     /\b(products|bags|range|product|bag)\b/.test(msg) ||
-    msg.includes("products dekhen")
+    msg.includes("view products")
   ) {
-    return "Hamare products:\n\u2022 Valve Paper Bags\n\u2022 Open Mouth Paper Bags\n\u2022 Multiwall Paper Bags\n\u2022 HDPE Laminated Paper Bags\n\u2022 Aluminium Foil Bags\n\nKisi bhi product ke baare mein detail ke liye Our Range page visit karein.";
+    return "Our product range:\n\u2022 Valve Paper Bags\n\u2022 Open Mouth Paper Bags\n\u2022 Multiwall Paper Bags\n\u2022 HDPE Laminated Paper Bags\n\u2022 Aluminium Foil Bags\n\nVisit the Our Range page to explore specifications and applications.";
   }
   if (
     /\b(price|cost|rate|kitna|pricing|daam)\b/.test(msg) ||
-    msg.includes("price poochein")
+    msg.includes("ask pricing")
   ) {
-    return "Pricing bulk quantity par depend karti hai. Minimum order 1000 bags hai. Direct quote ke liye WhatsApp karein ya Contact page pe jaayein. \uD83D\uDCB0";
+    return "Pricing depends on quantity, bag type, and print requirements. The minimum order quantity is 1000 bags. For a custom quote, use WhatsApp or the Contact page.";
   }
   if (
     /\b(order|kaise order|order kaise|place order|order karna|booking)\b/.test(
       msg,
     ) ||
-    msg.includes("order kaise karein")
+    msg.includes("how to order")
   ) {
-    return "Order place karne ke liye Place Order page pe jaayein. Minimum quantity 1000 bags hai. Form fill karein aur Order ID generate hogi. \uD83D\uDCE6";
+    return "Go to the Place Order page, fill in your details, and submit the form. The minimum order quantity is 1000 bags, and you will receive an Order ID right away.";
   }
   if (
     /\b(track|status|order status|kahan|tracking)\b/.test(msg) ||
-    msg.includes("order track karein")
+    msg.includes("track order")
   ) {
-    return "Apna Order ID enter karein Track Order page pe apna status check karne ke liye. Order ID format: MB12345 \uD83D\uDD0D";
+    return "Use the Track Order page and enter your Order ID to check the latest status. Example format: MB12345.";
   }
   if (/\b(contact|phone|address|location|call|email|number)\b/.test(msg)) {
-    return "Aap Contact Us page pe jaayein ya seedha WhatsApp karein. \uD83D\uDCDE\n\nAddress: Industrial Area, Pune, Maharashtra\nPhone: +91 9161722416\nEmail: vipinyadav4926@gmail.com";
+    return "You can visit the Contact Us page or reach out directly on WhatsApp.\n\nAddress: Industrial Area, Pune, Maharashtra\nPhone: +91 9161722416\nEmail: vipinyadav4926@gmail.com";
   }
   if (/\b(minimum|min order|moq|quantity)\b/.test(msg)) {
-    return "Hamari minimum order quantity (MOQ) 1000 bags hai. Bulk orders ke liye special pricing milti hai! \uD83D\uDCCA";
+    return "Our minimum order quantity (MOQ) is 1000 bags. Bulk orders can be priced according to quantity and customization.";
   }
-  return "Sorry, main samajh nahi paya. \uD83D\uDE05 Aap WhatsApp pe message karein ya Contact page use karein.";
+  return "Sorry, I did not understand that. Please try another question, use WhatsApp, or visit the Contact page.";
 }
 
 let msgCounter = 0;
@@ -62,7 +62,7 @@ function genId() {
 
 const WELCOME_MSG: Message = {
   id: "msg_0",
-  text: "Namaste! \uD83D\uDE4F Main Mega Bags Assistant hoon. Kaise madad kar sakta hoon?",
+  text: "Hello! I am the Mega Bags Assistant. How can I help you today?",
   sender: "bot",
 };
 
@@ -213,7 +213,7 @@ export default function ChatBot() {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Apna sawal likhein..."
+              placeholder="Type your question..."
               className="flex-1 text-sm px-3 py-2 border border-gray-200 rounded-full outline-none focus:border-[#0E5A7A] focus:ring-1 focus:ring-[#0E5A7A]/20 transition-all bg-gray-50"
               data-ocid="chatbot.input"
             />
